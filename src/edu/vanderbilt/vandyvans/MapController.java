@@ -61,13 +61,6 @@ public class MapController implements Handler.Callback,
 
     /**
      * The sole constructor.
-     *
-     * @param mapFrag
-     * @param overlayBar
-     * @param blueBtn
-     * @param redBtn
-     * @param greenBtn
-     * @param clients
      */
     public MapController(SupportMapFragment mapFrag,
                          LinearLayout       overlayBar,
@@ -99,22 +92,19 @@ public class MapController implements Handler.Callback,
      * the data from whatever source it has access to, then reply with the data.
      *
      * See: `routeSelected(route)`
-     *
-     * @param message
-     * @return
      */
     @Override
     public boolean handleMessage(Message message) {
         if (message.obj instanceof Global.WaypointResults)
-            return drawWaypoints((Global.WaypointResults) message.obj);
+            handleWaypointResult((Global.WaypointResults) message.obj);
 
         if (message.obj instanceof Global.StopResults)
-            return drawStops((Global.StopResults) message.obj);
+            handleStopResults((Global.StopResults) message.obj);
 
         if (message.obj instanceof Global.VanResults)
-            return drawVans((Global.VanResults) message.obj);
+            handleVanResults((Global.VanResults) message.obj);
 
-        return false;
+        return true;
     }
 
     /**
@@ -123,8 +113,6 @@ public class MapController implements Handler.Callback,
      * and van locations. Then clear and center the map.
      *
      * See: `onClick(view)`
-     *
-     * @param route
      */
     public void routeSelected(Route route) {
         if (mClients == null) {
@@ -134,6 +122,7 @@ public class MapController implements Handler.Callback,
         mCurrentRoute = route;
         mOverlayBar.setBackgroundColor(mGlobal.getColorFor(mCurrentRoute));
 
+        // Requesting data from the services.
         Message.obtain(mClients.vandyVans(), 0,
                        new Global.FetchWaypoints(bridge, route))
                 .sendToTarget();
@@ -177,6 +166,18 @@ public class MapController implements Handler.Callback,
 
     public void mapIsShown() {
         routeSelected(mCurrentRoute);
+    }
+
+    void handleWaypointResult(Global.WaypointResults results) {
+        drawWaypoints(results);
+    }
+
+    void handleStopResults(Global.StopResults result) {
+        drawStops(result);
+    }
+
+    void handleVanResults(Global.VanResults result) {
+        drawVans(result);
     }
 
     private boolean drawWaypoints(Global.WaypointResults result) {
@@ -227,7 +228,7 @@ public class MapController implements Handler.Callback,
             map.addMarker(new MarkerOptions()
                                   .position(new LatLng(v.location.lat,
                                                        v.location.lon))
-                                  .title("" + v.percentFull + "%")
+                                  .title(Integer.toString(v.percentFull) + "%")
                                   .draggable(false)
                                   .flat(true)
                                   .icon(BitmapDescriptorFactory
@@ -247,6 +248,10 @@ public class MapController implements Handler.Callback,
                             DEFAULT_ZOOM);
         }
         return mDefaultCamera;
+    }
+
+    static final class RedrawWithUpdatedVanLocation {
+
     }
 
 }

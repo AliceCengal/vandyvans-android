@@ -38,6 +38,7 @@
 
         <View
                 android:layout_width="match_parent"
+                android:visibility="gone"
                 android:layout_height="4dp">
 
             <!-- Separator -->
@@ -45,12 +46,14 @@
 
         <Button
                 android:id="@+id/button3"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/location_setting"/>
 
         <View
                 android:layout_width="match_parent"
+                android:visibility="gone"
                 android:layout_height="4dp">
 
             <!-- Separator -->
@@ -58,9 +61,11 @@
 
         <Button
                 android:id="@+id/button4"
+                android:visibility="gone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/notification_setting"/>
+
     </LinearLayout>
 
     <LinearLayout
