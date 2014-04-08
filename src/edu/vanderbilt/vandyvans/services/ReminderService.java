@@ -183,7 +183,7 @@ public class ReminderService extends Service implements Handler.Callback {
 
         @Override public void handleMessage(Message msg) {
             if (msg.what == INIT) {
-                logMessage("Initing for stopd: " + stopId);
+                logMessage("Initing for stopId: " + stopId);
                 isTracking = true;
                 Message.obtain(syncroClient, 0,
                                new Global.FetchArrivalTimes(this,
