@@ -48,6 +48,11 @@
                 android:screenOrientation="portrait">
         </activity>
 
+        <service
+                android:name="edu.vanderbilt.vandyvans.services.ReminderService"
+                android:exported="false">
+                </service>
+
         <meta-data
                 android:name="com.google.android.maps.v2.API_KEY"
                 android:value="@string/maps_api_key"/>

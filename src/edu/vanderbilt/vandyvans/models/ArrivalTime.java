@@ -17,4 +17,16 @@ public class ArrivalTime {
         minutes = _min;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder("ArrivalTime(")
+                .append(stop.name)
+                .append(", ")
+                .append(route.name)
+                .append(", ")
+                .append(minutes)
+                .append(")")
+                .toString();
+    }
+
 }

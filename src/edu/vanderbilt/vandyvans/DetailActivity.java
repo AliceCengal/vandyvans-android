@@ -47,10 +47,11 @@ public final class DetailActivity
     @InjectView(R.id.tv5)       private TextView    mReminderText;
     @InjectView(R.id.cb1)       private Switch      mReminderSwitch;
 
-    private ReminderController reminderController;
-    private Handler            controller;
-    private Stop               stop;
-    @Inject VandyClients       apiClient;
+    private ReminderViewController reminderViewController;
+    private Handler                controller;
+            Stop                   stop;
+    @Inject VandyClients           apiClient;
+    @Inject ReminderController     reminderController;
 
     @Override
     public void onCreate(Bundle saved) {
@@ -89,9 +90,12 @@ public final class DetailActivity
                                stop))
                 .sendToTarget();
 
-        // Setup the controller for the Reminder subsystem.
-        reminderController = new ReminderController(mReminderSwitch,
-                                                    mReminderText);
+        // Setup the controller for the Reminder view subsystem.
+        reminderViewController =
+                new ReminderViewController(mReminderSwitch,
+                                           mReminderText,
+                                           this);
+
     }
 
     public static void openForId(int id, Context ctx) {
@@ -136,6 +140,22 @@ public final class DetailActivity
         return true;
     }
 
+    int getStopId() {
+        return stop.id;
+    }
+
+    void doSubscribe() {
+        reminderController.subscribeReminderForStop(getStopId());
+    }
+
+    void doUnsubscribe() {
+        reminderController.unsubscribeReminderForStop(getStopId());
+    }
+
+    boolean isSubscribed() {
+        return reminderController.isSubscribedToStop(getStopId());
+    }
+
     private static class ArrivalTimeViewHolder {
 
         final View     view;
@@ -162,16 +182,22 @@ public final class DetailActivity
 
     }
 
-    private static class ReminderController
+    private static class ReminderViewController
             implements View.OnClickListener,
                        CompoundButton.OnCheckedChangeListener {
 
-        final Switch   mSwitch;
-        final TextView mText;
+        final Switch         mSwitch;
+        final TextView       mText;
+        final DetailActivity mParent;
 
-        ReminderController(Switch _switch, TextView _text) {
+        ReminderViewController(Switch         _switch,
+                               TextView       _text,
+                               DetailActivity _parent) {
             mSwitch = _switch;
             mText   = _text;
+            mParent = _parent;
+
+            mSwitch.setChecked(mParent.isSubscribed());
 
             mSwitch.setOnCheckedChangeListener(this);
             mText.setOnClickListener(this);
@@ -183,8 +209,12 @@ public final class DetailActivity
         }
 
         @Override
-        public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-            // TODO
+        public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
+            if (checked) {
+                mParent.doSubscribe();
+            } else {
+                mParent.doUnsubscribe();
+            }
         }
     }
 

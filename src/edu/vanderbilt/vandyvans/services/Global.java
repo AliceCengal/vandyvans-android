@@ -24,10 +24,11 @@ import android.util.Log;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provider;
-import edu.vanderbilt.vandyvans.R;
-import edu.vanderbilt.vandyvans.models.Routes;
 import roboguice.RoboGuice;
 
+import edu.vanderbilt.vandyvans.R;
+import edu.vanderbilt.vandyvans.ReminderController;
+import edu.vanderbilt.vandyvans.models.Routes;
 import edu.vanderbilt.vandyvans.models.ArrivalTime;
 import edu.vanderbilt.vandyvans.models.FloatPair;
 import edu.vanderbilt.vandyvans.models.Route;
@@ -49,8 +50,10 @@ public final class Global extends android.app.Application {
     public static final double DEFAULT_LONGITUDE = -86.805811;
     public static final double DEFAULT_LATITUDE  = 36.143905;
     public static final String APP_LOG_ID        = "VandyVans";
+    public static final String APP_PREFERENCES   = "VandyVansPreferences";
 
-    private VandyClientsSingleton mClientSingleton;
+    private VandyClientsSingleton    mClientSingleton;
+    private SimpleReminderController mReminderController;
 
     private int COLOR_RED;
     private int COLOR_BLUE;
@@ -90,6 +93,8 @@ public final class Global extends android.app.Application {
         return true;
     }
 
+
+
     /**
      * Called in the `onCreate` of android.app.Application when the process
      * for this app is first created. This will initialize the service
@@ -103,8 +108,11 @@ public final class Global extends android.app.Application {
 
         // Create an Object to hold on to the services.
         mClientSingleton = new VandyClientsSingleton(thread, this);
+        mReminderController = new SimpleReminderController(this);
 
-        // Create a provider to inject the Service Holder to anybody who
+        mReminderController.start();
+
+        // Create providers to inject the Service Holder to anybody who
         // needs it.
         RoboGuice.setBaseApplicationInjector(
                 this,
@@ -128,6 +136,14 @@ public final class Global extends android.app.Application {
                                     @Override
                                     public Global get() {
                                         return Global.this;
+                                    }
+                                });
+
+                        binder.bind(ReminderController.class)
+                                .toProvider(new Provider<ReminderController>() {
+                                    @Override
+                                    public ReminderController get() {
+                                        return mReminderController;
                                     }
                                 });
                     }
