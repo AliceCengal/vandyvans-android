@@ -21,6 +21,8 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
+import com.parse.Parse;
+
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provider;
@@ -70,6 +72,10 @@ public final class Global extends android.app.Application {
         COLOR_RED   = res.getColor(R.color.red_argb);
         COLOR_GREEN = res.getColor(R.color.green_argb);
         COLOR_BLACK = res.getColor(android.R.color.black);
+
+        Parse.initialize(this,
+                         "6XOkxBODp8HZANJaxFhEfSFPZ8H93Pt9531Htt1X",
+                         "61wOewMMN0YISmX3UM79PGssnTsz1NfkOOMOsHMm");
     }
 
     public int getRed() { return COLOR_RED; }

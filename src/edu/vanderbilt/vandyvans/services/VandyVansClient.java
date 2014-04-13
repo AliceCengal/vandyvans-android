@@ -18,6 +18,7 @@ import android.util.Log;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.parse.ParseObject;
 
 import edu.vanderbilt.vandyvans.models.FloatPair;
 import edu.vanderbilt.vandyvans.models.Report;
@@ -36,6 +37,13 @@ final class VandyVansClient implements Handler.Callback {
     private static final String     REPORT_URL = "http://studentorgs.vanderbilt.edu/vandymobile/bugReport.php";
     private static final JsonParser PARSER     = new JsonParser();
 
+    private static final String REPORT_CLASSNAME = "VVReport";
+    private static final String REPORT_USEREMAIL = "userEmail";
+    private static final String REPORT_BODY      = "body";
+    private static final String REPORT_ISBUG     = "isBugReport";
+    private static final String REPORT_NOTIFY    = "notifyWhenResolved";
+
+
     @Override
     public boolean handleMessage(Message msg) {
         if (msg.obj instanceof Global.Initialize)
@@ -52,7 +60,7 @@ final class VandyVansClient implements Handler.Callback {
                     ((Global.FetchWaypoints) msg.obj).route);
 
         else if (msg.obj instanceof Report)
-            return true; //postReport((Report) msg.obj); TODO
+            return postReportUsingParseApi((Report) msg.obj);
 
         else return false;
     }
@@ -191,6 +199,16 @@ final class VandyVansClient implements Handler.Callback {
         params.put("body"              , report.bodyOfReport);
         params.put("notifyWhenResolved", report.notifyWhenResolved? "TRUE" : "FALSE");
         return params;
+    }
+
+    private boolean postReportUsingParseApi(Report report) {
+        ParseObject reportObj = new ParseObject(REPORT_CLASSNAME);
+        reportObj.put(REPORT_USEREMAIL, report.senderAddress);
+        reportObj.put(REPORT_BODY,      report.bodyOfReport);
+        reportObj.put(REPORT_ISBUG,     report.isBugReport);
+        reportObj.put(REPORT_NOTIFY,    report.notifyWhenResolved);
+        reportObj.saveInBackground();
+        return true;
     }
 
 }

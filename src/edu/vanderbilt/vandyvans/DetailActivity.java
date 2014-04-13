@@ -49,7 +49,7 @@ public final class DetailActivity
 
     private ReminderViewController reminderViewController;
     private Handler                controller;
-            Stop                   stop;
+    private Stop                   stop;
     @Inject VandyClients           apiClient;
     @Inject ReminderController     reminderController;
 

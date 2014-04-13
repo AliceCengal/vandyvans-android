@@ -59,7 +59,7 @@ class SimpleReminderController implements ReminderController,
     }
 
     /**
-     * implementation from Global.ReminderController
+     * implementation from ReminderController
      */
     public void subscribeReminderForStop(int stopId) {
         subscribedStops.add(stopId);
@@ -72,7 +72,7 @@ class SimpleReminderController implements ReminderController,
     }
 
     /**
-     * implementation from Global.ReminderController
+     * implementation from ReminderController
      */
     public void unsubscribeReminderForStop(int stopId) {
         subscribedStops.remove(stopId);
@@ -83,7 +83,7 @@ class SimpleReminderController implements ReminderController,
     }
 
     /**
-     * implementation from Global.ReminderController
+     * implementation from ReminderController
      */
     public boolean isSubscribedToStop(int stopId) {
         return subscribedStops.contains(Integer.valueOf(stopId));
@@ -139,9 +139,10 @@ class SimpleReminderController implements ReminderController,
     }
 
     private void recordSubscription() {
-        final SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        prefsEditor.putString(REMINDER_SUBSCRIPTION, encodeIntegerSetToString(subscribedStops));
-        prefsEditor.apply();
+        mPrefs.edit()
+                .putString(REMINDER_SUBSCRIPTION,
+                           encodeIntegerSetToString(subscribedStops))
+                .apply();
     }
 
     private void doBindService() {

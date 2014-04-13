@@ -1,6 +1,10 @@
 package edu.vanderbilt.vandyvans.models;
 
 /**
+ * Data object that represents a bug report or a feedback from the user.
+ *
+ * All class in the model package are fully immutable and thread safe.
+ *
  * Created by athran on 3/16/14.
  */
 public final class Report {

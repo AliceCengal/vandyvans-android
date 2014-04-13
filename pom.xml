@@ -7,19 +7,34 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.vanderbilt</groupId>
-    <artifactId>.vandyvans</artifactId>
+    <artifactId>vandyvans</artifactId>
     <packaging>apk</packaging>
     <version>0.0.1-SNAPSHOT</version>
     <name>Vandy Vans</name>
 
-    <dependencies>
+    <repositories>
+        <repository>
+            <id>repo</id>
+            <releases>
+                <enabled>true</enabled>
+                <checksumPolicy>ignore</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <url>file://${project.basedir}/repo</url>
+        </repository>
+    </repositories>
 
+    <dependencies>
+<!--
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.2</version>
         </dependency>
-
+-->
+        <!--
         <dependency>
             <groupId>com.github.tony19</groupId>
             <artifactId>logback-android-core</artifactId>
@@ -31,7 +46,7 @@
             <artifactId>logback-android-classic</artifactId>
             <version>1.0.7-1</version>
         </dependency>
-
+-->
         <dependency>
             <groupId>com.google.android</groupId>
             <artifactId>android</artifactId>
@@ -70,6 +85,12 @@
             <groupId>org.roboguice</groupId>
             <artifactId>roboguice</artifactId>
             <version>2.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.parse</groupId>
+            <artifactId>Parse</artifactId>
+            <version>1.4.3</version>
         </dependency>
 
     </dependencies>
