@@ -21,12 +21,11 @@ import android.os.HandlerThread;
 import android.os.Message;
 import android.util.Log;
 
-import com.parse.Parse;
-
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provider;
 import roboguice.RoboGuice;
+import com.parse.Parse;
 
 import edu.vanderbilt.vandyvans.R;
 import edu.vanderbilt.vandyvans.ReminderController;

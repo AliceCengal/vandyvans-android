@@ -86,7 +86,7 @@
                 style="@style/about_credits"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Green Lantern"
+                android:text="@string/creator"
                 android:textStyle="bold"/>
 
         <View
@@ -107,7 +107,7 @@
                 style="@style/about_credits"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Batman"
+                android:text="@string/designer"
                 android:textStyle="bold"/>
     </LinearLayout>
 

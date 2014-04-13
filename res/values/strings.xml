@@ -29,6 +29,8 @@
     
     <string name="created_by">CREATED BY:</string>
     <string name="graphics_design">GRAPHIC DESIGN BY:</string>
+    <string name="creator">Athran Rahman</string>
+    <string name="designer">Fletcher Young</string>
     
     <string name="notification_setting">Notification Settings</string>
 

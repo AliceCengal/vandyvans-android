@@ -23,13 +23,15 @@ import edu.vanderbilt.vandyvans.models.Van;
 import static edu.vanderbilt.vandyvans.services.Global.APP_LOG_ID;
 
 /**
-* Created by athran on 3/16/14.
-*/
+ * Implements the requests to the `api.syncromatics.com` server.
+ *
+ * Created by athran on 3/16/14.
+ */
 final class SyncromaticsClient implements Handler.Callback {
 
-    private static final String LOG_TAG = "SyncromaticsClient";
+    private static final String LOG_TAG  = "SyncromaticsClient";
     private static final String BASE_URL = "http://api.syncromatics.com";
-    private static final String API_KEY = "?api_key=a922a34dfb5e63ba549adbb259518909";
+    private static final String API_KEY  = "?api_key=a922a34dfb5e63ba549adbb259518909";
 
     private static final JsonParser PARSER = new JsonParser();
 

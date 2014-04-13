@@ -28,8 +28,10 @@ import edu.vanderbilt.vandyvans.models.Stop;
 import static edu.vanderbilt.vandyvans.services.Global.APP_LOG_ID;
 
 /**
-* Created by athran on 3/16/14.
-*/
+ * Implements the requests to the `vandyvans.com` server
+ *
+ * Created by athran on 3/16/14.
+ */
 final class VandyVansClient implements Handler.Callback {
 
     private static final String     LOG_TAG    = "VandyVansClient";

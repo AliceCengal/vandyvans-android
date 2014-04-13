@@ -26,9 +26,10 @@ import edu.vanderbilt.vandyvans.models.Stops;
 import static edu.vanderbilt.vandyvans.services.Global.APP_LOG_ID;
 
 /**
- * The Service that queries the Syncromatics server for arrival times.
+ * The Service that queries the Syncromatics server for arrival times. When
+ * a van arrives, publish the result and create a Notification.
  *
- * When a van arrives, publish the result and create a Notification.
+ * See: `/docs/architecture_for_the_reminder_system.jpg`
  *
  * Created by athran on 4/6/14.
  */
@@ -146,12 +147,13 @@ public class ReminderService extends Service implements Handler.Callback {
                 mReminderId,
                 new Notification.Builder(this)
                         .setContentTitle("Van Arriving")
-                        .setContentText(new StringBuilder("The ")
-                                                .append(arrivalTime.route.name)
-                                                .append(" Route will be arriving at ")
-                                                .append(arrivalTime.stop.name)
-                                                .append(" in 5 minutes")
-                                                .toString())
+                        .setContentText(
+                                new StringBuilder("The ")
+                                        .append(arrivalTime.route.name)
+                                        .append(" Route will be arriving at ")
+                                        .append(arrivalTime.stop.name)
+                                        .append(" in 5 minutes")
+                                        .toString())
                         .setSmallIcon(R.drawable.van_icon)
                         .getNotification());
     }

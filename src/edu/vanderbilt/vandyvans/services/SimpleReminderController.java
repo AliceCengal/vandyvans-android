@@ -20,7 +20,19 @@ import edu.vanderbilt.vandyvans.ReminderController;
 import static edu.vanderbilt.vandyvans.services.Global.APP_LOG_ID;
 
 /**
- * Implementation of the ReminderController interface.
+ * Implementation of the ReminderController interface. The Controller manages the
+ * state of the system, which for now is the `Set<Integer>` that represent
+ * the set of Stops that User is currently subscribed to for reminder. SimpleReminderController
+ * interacts directly with the UI in the main thread.
+ *
+ * This object also manages persistence. The set of Stop ids are stored in the
+ * `SharedPreferences`. Using a database seems like overkill for a short list of numbers.
+ *
+ * The Controller will spawn ReminderService as needed. The service will query the
+ * Syncromatics server for arrival times, and then schedule Notification when the van is
+ * expected to arrive.
+ *
+ * See: `/docs/architecture_for_the_reminder_system.jpg`
  *
  * Created by athran on 4/6/14.
  */
