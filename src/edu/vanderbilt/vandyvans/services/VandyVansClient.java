@@ -80,7 +80,7 @@ final class VandyVansClient implements Handler.Callback {
     private boolean init(Context ctx) {
         Log.d(APP_LOG_ID, LOG_TAG + " | Initialization");
         mPrefs = ctx.getSharedPreferences(Global.APP_PREFERENCES,
-                                           Context.MODE_PRIVATE);
+                                          Context.MODE_PRIVATE);
         return true;
     }
 
@@ -119,7 +119,7 @@ final class VandyVansClient implements Handler.Callback {
                 .append("/Direction/0/Stops");
 
         try {
-            final Reader reader = new InputStreamReader(Global.get(buffer.toString()));
+            final Reader reader    = new InputStreamReader(Global.get(buffer.toString()));
             final String rawResult = readAll(reader);
             reader.close();
 
@@ -191,7 +191,7 @@ final class VandyVansClient implements Handler.Callback {
                 .append("/Waypoints");
 
         try {
-            final Reader reader = new InputStreamReader(Global.get(buffer.toString()));
+            final Reader reader    = new InputStreamReader(Global.get(buffer.toString()));
             final String rawResult = readAll(reader);
             reader.close();
 
@@ -239,9 +239,9 @@ final class VandyVansClient implements Handler.Callback {
 
             Log.i(APP_LOG_ID, LOG_TAG + " | Vandy Vans server response for report.");
             //Log.i(LOG_TAG, buffer.toString());
-            for (String line = respReader.readLine(); // Yeah motherfucker
-                 line != null;
-                 line = respReader.readLine()) {
+            for (String line  = respReader.readLine(); // Yeah motherfucker
+                        line != null;
+                        line  = respReader.readLine()) {
                 Log.i(APP_LOG_ID, line);
             }
 
@@ -257,7 +257,7 @@ final class VandyVansClient implements Handler.Callback {
 
     private String generateJsonOutput(Report report) {
         final StringWriter buffer = new StringWriter();
-        final JsonWriter writer = new JsonWriter(buffer);
+        final JsonWriter writer   = new JsonWriter(buffer);
 
         try {
             writer.beginObject();
@@ -292,10 +292,10 @@ final class VandyVansClient implements Handler.Callback {
     private boolean postReportUsingParseApi(Report report) {
         ParseObject reportObj = new ParseObject(REPORT_CLASSNAME);
         reportObj.put(REPORT_USEREMAIL, report.senderAddress);
-        reportObj.put(REPORT_BODY,      report.bodyOfReport);
-        reportObj.put(REPORT_ISBUG,     report.isBugReport);
-        reportObj.put(REPORT_NOTIFY,    report.notifyWhenResolved);
-        reportObj.saveInBackground();
+        reportObj.put(REPORT_BODY     , report.bodyOfReport);
+        reportObj.put(REPORT_ISBUG    , report.isBugReport);
+        reportObj.put(REPORT_NOTIFY   , report.notifyWhenResolved);
+        reportObj.saveEventually();
         return true;
     }
 
@@ -304,7 +304,7 @@ final class VandyVansClient implements Handler.Callback {
      */
     private boolean isCacheExpired(String cacheId) {
         final long currentTime = System.currentTimeMillis();
-        final long cacheDate = mPrefs.getLong(cacheId, currentTime);
+        final long cacheDate   = mPrefs.getLong(cacheId, currentTime);
         return (currentTime - cacheDate) > CACHE_EXPIRATION;
     }
 
@@ -326,8 +326,8 @@ final class VandyVansClient implements Handler.Callback {
 
         try {
             for (int c = reader.read();
-                 c > -1;
-                 c = reader.read()) {
+                     c > -1;
+                     c = reader.read()) {
                 buffer.write(c);
             }
         } catch (IOException e) {
