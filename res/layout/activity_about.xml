@@ -66,6 +66,33 @@
                 android:layout_height="wrap_content"
                 android:text="@string/notification_setting"/>
 
+        <View
+                android:layout_width="match_parent"
+                android:visibility="gone"
+                android:layout_height="4dp">
+
+            <!-- Separator -->
+        </View>
+
+        <Button
+                android:visibility="gone"
+                android:id="@+id/button5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/attribution"/>
+
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="4dp">
+
+            <!-- Separator -->
+        </View>
+
+        <Button
+                android:id="@+id/button6"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/source_code"/>
     </LinearLayout>
 
     <LinearLayout

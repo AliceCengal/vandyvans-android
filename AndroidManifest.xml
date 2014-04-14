@@ -47,6 +47,10 @@
                 android:name="edu.vanderbilt.vandyvans.FormActivity"
                 android:screenOrientation="portrait">
         </activity>
+        <activity
+                android:name="edu.vanderbilt.vandyvans.CodeAccessActivity"
+                android:screenOrientation="portrait">
+        </activity>
 
         <service
                 android:name="edu.vanderbilt.vandyvans.services.ReminderService"

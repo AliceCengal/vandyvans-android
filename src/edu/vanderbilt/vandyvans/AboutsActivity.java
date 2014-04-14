@@ -22,6 +22,7 @@ public final class AboutsActivity extends RoboActivity {
 
     @InjectView(R.id.button1) private Button mBugReport;
     @InjectView(R.id.button2) private Button mFeedbackReport;
+    @InjectView(R.id.button6) private Button mSourceCode;
 
     @Inject VandyClients clients;
 
@@ -53,6 +54,13 @@ public final class AboutsActivity extends RoboActivity {
                 i.putExtra(FormActivity.TAG_FORMTITLE   , "Send Feedback");
                 i.putExtra(FormActivity.TAG_FORMBODYHINT, "thoughts on the app");
                 startActivityForResult(i, 1);
+            }
+        });
+
+        mSourceCode.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                CodeAccessActivity.open(AboutsActivity.this);
             }
         });
 
