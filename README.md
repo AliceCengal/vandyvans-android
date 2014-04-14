@@ -56,6 +56,20 @@ export ANDROID_SDK=/home/{path_to_the_folder}/sdk
 
           ./gms-mvn-install.sh 7
 
+* Create a new file `res/values/mapsapikey.xml` (which is automatically excluded in `.gitignore`) and put in this text:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="maps_api_key_v2">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</string>
+</resources>
+```
+
+  - Get your own API key by following the instructions on [this page](https://developers.google.com/maps/documentation/android/start#getting_the_google_maps_android_api_v2)
+    and place the key in here.
+  - Please double check before your first commit to make sure that your API key is not
+    included in the version control history.
+
 ## Build
 
 You can build using Maven:
