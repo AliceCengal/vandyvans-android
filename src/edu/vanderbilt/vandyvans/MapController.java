@@ -145,13 +145,13 @@ public class MapController implements Handler.Callback,
 
     @Override
     public void onClick(View view) {
-        if (view == mBlueButton) {
+        if (view == mBlueButton && mCurrentRoute != Routes.BLUE) {
             routeSelected(Routes.BLUE);
 
-        } else if (view == mRedButton) {
+        } else if (view == mRedButton && mCurrentRoute != Routes.RED) {
             routeSelected(Routes.RED);
 
-        } else if (view == mGreenButton) {
+        } else if (view == mGreenButton && mCurrentRoute != Routes.GREEN) {
             routeSelected(Routes.GREEN);
         }
     }
@@ -185,14 +185,7 @@ public class MapController implements Handler.Callback,
         if (map == null) { return true; }
 
         PolylineOptions polyline = new PolylineOptions();
-
         polyline.color(mGlobal.getColorFor(mCurrentRoute));
-
-        //polyline.color(
-        //        (mCurrentRoute == Routes.BLUE)  ? 0xff0000ff :
-        //        (mCurrentRoute == Routes.RED)   ? 0xffff0000 :
-         //       (mCurrentRoute == Routes.GREEN) ? 0xff00ff00 :
-        //       0xff000000);
         polyline.width(DEFAULT_WIDTH);
 
         for (FloatPair point : result.waypoints) {
@@ -225,15 +218,16 @@ public class MapController implements Handler.Callback,
 
         Log.i(APP_LOG_ID, LOG_ID + " | Received this many Van results: " + result.vans.size());
         for (Van v : result.vans) {
-            map.addMarker(new MarkerOptions()
-                                  .position(new LatLng(v.location.lat,
-                                                       v.location.lon))
-                                  .title(Integer.toString(v.percentFull) + "%")
-                                  .draggable(false)
-                                  .flat(true)
-                                  .icon(BitmapDescriptorFactory
-                                                .fromResource(R.drawable.van_icon))
-                                  .anchor(0.5f, 0.5f));
+            map.addMarker(
+                    new MarkerOptions()
+                            .position(new LatLng(v.location.lat,
+                                                 v.location.lon))
+                            .title(Integer.toString(v.percentFull) + "%")
+                            .draggable(false)
+                            .flat(true)
+                            .icon(BitmapDescriptorFactory
+                                          .fromResource(R.drawable.van_icon))
+                            .anchor(0.5f, 0.5f));
         }
 
         return true;

@@ -162,7 +162,7 @@ final class VandyVansClient implements Handler.Callback {
         String cacheDateId = ROUTE_CACHE_DATE + r.id;
 
         if (mPrefs.contains(cacheId)) {
-            if (!isCacheExpired(cacheId)) {
+            if (!isCacheExpired(cacheDateId)) {
                 List<FloatPair> result = parseWaypointResult(
                         new StringReader(
                                 mPrefs.getString(cacheId, "")));
@@ -302,9 +302,9 @@ final class VandyVansClient implements Handler.Callback {
     /**
      * Cache is expired if it was made more than two weeks ago.
      */
-    private boolean isCacheExpired(String cacheId) {
+    private boolean isCacheExpired(String cacheDateId) {
         final long currentTime = System.currentTimeMillis();
-        final long cacheDate   = mPrefs.getLong(cacheId, currentTime);
+        final long cacheDate   = mPrefs.getLong(cacheDateId, currentTime);
         return (currentTime - cacheDate) > CACHE_EXPIRATION;
     }
 
