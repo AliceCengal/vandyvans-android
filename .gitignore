@@ -42,3 +42,7 @@ target/
 
 # vim artifact
 *.swp
+
+# eclipse cookies
+.settings/
+.project
