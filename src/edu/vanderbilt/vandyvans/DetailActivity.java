@@ -22,8 +22,8 @@ import edu.vanderbilt.vandyvans.models.ArrivalTime;
 import edu.vanderbilt.vandyvans.models.Routes;
 import edu.vanderbilt.vandyvans.models.Stop;
 import edu.vanderbilt.vandyvans.models.Stops;
-import edu.vanderbilt.vandyvans.services.Global;
-import edu.vanderbilt.vandyvans.services.VandyClients;
+import edu.vanderbilt.vandyvans.services.Clients;
+import edu.vanderbilt.vandyvans.services.SyncromaticsClient;
 
 public final class DetailActivity
         extends RoboActivity
@@ -50,7 +50,7 @@ public final class DetailActivity
     private ReminderViewController reminderViewController;
     private Handler                controller;
     private Stop                   stop;
-    @Inject VandyClients           apiClient;
+    @Inject Clients                apiClient;
     @Inject ReminderController     reminderController;
 
     @Override
@@ -85,7 +85,7 @@ public final class DetailActivity
 
         // Request arrival times from the server.
         Message.obtain(apiClient.syncromatics(), 0,
-                       new Global.FetchArrivalTimes(
+                       new SyncromaticsClient.FetchArrivalTimes(
                                controller,
                                stop))
                 .sendToTarget();
@@ -106,8 +106,9 @@ public final class DetailActivity
 
     @Override
     public boolean handleMessage(Message message) {
-        if (message.obj instanceof Global.ArrivalTimeResults) {
-            return displayArrivalTimes(((Global.ArrivalTimeResults) message.obj).times);
+        if (message.obj instanceof SyncromaticsClient.ArrivalTimeResults) {
+            return displayArrivalTimes(
+                    ((SyncromaticsClient.ArrivalTimeResults) message.obj).times);
         }
         return false;
     }

@@ -23,8 +23,8 @@ import com.google.inject.Inject;
 import roboguice.activity.RoboFragmentActivity;
 import roboguice.inject.InjectView;
 
+import edu.vanderbilt.vandyvans.services.Clients;
 import edu.vanderbilt.vandyvans.services.Global;
-import edu.vanderbilt.vandyvans.services.VandyClients;
 
 public final class StopActivity extends RoboFragmentActivity
         implements ActionBar.TabListener {
@@ -54,8 +54,8 @@ public final class StopActivity extends RoboFragmentActivity
     @InjectView(R.id.btn_red)   Button       mRedButton;
     @InjectView(R.id.btn_green) Button       mGreenButton;
 
-    @Inject VandyClients clients;
-    @Inject Global       globals;
+    @Inject Clients clients;
+    @Inject Global  globals;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

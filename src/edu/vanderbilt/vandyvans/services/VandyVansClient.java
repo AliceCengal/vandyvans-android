@@ -35,7 +35,50 @@ import static edu.vanderbilt.vandyvans.services.Global.APP_LOG_ID;
  *
  * Created by athran on 3/16/14.
  */
-final class VandyVansClient implements Handler.Callback {
+public final class VandyVansClient implements Handler.Callback {
+
+    /**
+     * Signal for requesting Stop data from the VandyVans.com API.
+     *
+     * Reply: `StopResults`
+     *
+     * @author athran
+     */
+    public static final class FetchStops {
+        public final Route   route;
+        public final Handler from;
+        public FetchStops(Handler _from, Route _r) {
+            route = _r;
+            from  = _from;
+        }
+    }
+
+    /**
+     * To:    VandyVans Client
+     * Reply: `WaypointResults`
+     */
+    public static final class FetchWaypoints {
+        public final Route   route;
+        public final Handler from;
+        public FetchWaypoints(Handler _from, Route _r) {
+            route = _r;
+            from  = _from;
+        }
+    }
+
+    public static final class StopResults {
+        public final List<Stop> stops;
+        public StopResults(List<Stop> list) {
+            stops = list;
+        }
+    }
+
+    public static final class WaypointResults {
+        public final List<FloatPair> waypoints;
+        public WaypointResults(List<FloatPair> _waypoints) {
+            waypoints = _waypoints;
+        }
+    }
 
     private static final String     LOG_TAG    = "VandyVansClient";
     private static final String     BASE_URL   = "http://vandyvans.com";
@@ -56,20 +99,22 @@ final class VandyVansClient implements Handler.Callback {
 
     private SharedPreferences mPrefs;
 
+    /*package*/ VandyVansClient() {}
+
     @Override
     public boolean handleMessage(Message msg) {
         if (msg.obj instanceof Global.Initialize)
             return init(((Global.Initialize) msg.obj).ctx);
 
-        else if (msg.obj instanceof Global.FetchStops)
+        else if (msg.obj instanceof FetchStops)
             return fetchStops(
-                    ((Global.FetchStops) msg.obj).from,
-                    ((Global.FetchStops) msg.obj).route);
+                    ((FetchStops) msg.obj).from,
+                    ((FetchStops) msg.obj).route);
 
-        else if (msg.obj instanceof Global.FetchWaypoints)
+        else if (msg.obj instanceof FetchWaypoints)
             return waypoints(
-                    ((Global.FetchWaypoints) msg.obj).from,
-                    ((Global.FetchWaypoints) msg.obj).route);
+                    ((FetchWaypoints) msg.obj).from,
+                    ((FetchWaypoints) msg.obj).route);
 
         else if (msg.obj instanceof Report)
             return postReportUsingParseApi((Report) msg.obj);
@@ -101,7 +146,7 @@ final class VandyVansClient implements Handler.Callback {
 
                 } else {
                     requester
-                            .obtainMessage(0, new Global.StopResults(result))
+                            .obtainMessage(0, new StopResults(result))
                             .sendToTarget();
                     return true; // SHORTCUT
                 }
@@ -126,7 +171,7 @@ final class VandyVansClient implements Handler.Callback {
             final List<Stop> result = parseStopResult(new StringReader(rawResult));
 
             requester
-                    .obtainMessage(0, new Global.StopResults(result))
+                    .obtainMessage(0, new StopResults(result))
                     .sendToTarget();
 
             storeCacheRawDataUpdateDate(cacheId, rawResult, dateCacheId);
@@ -173,7 +218,7 @@ final class VandyVansClient implements Handler.Callback {
                 } else {
                     requester
                             .obtainMessage(0,
-                                           new Global.WaypointResults(result))
+                                           new WaypointResults(result))
                             .sendToTarget();
                     return true; // SHORTCUT
                 }
@@ -199,7 +244,7 @@ final class VandyVansClient implements Handler.Callback {
 
             requester
                     .obtainMessage(0,
-                            new Global.WaypointResults(result))
+                            new WaypointResults(result))
                     .sendToTarget();
 
             storeCacheRawDataUpdateDate(cacheId, rawResult, cacheDateId);

@@ -8,7 +8,7 @@ import android.os.Handler;
  *
  * Created by athran on 3/18/14.
  */
-public interface VandyClients {
+public interface Clients {
 
     /**
      * VandyVansClient Singleton provides the hook for performing http

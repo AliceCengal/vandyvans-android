@@ -21,8 +21,10 @@ import edu.vanderbilt.vandyvans.models.Route;
 import edu.vanderbilt.vandyvans.models.Routes;
 import edu.vanderbilt.vandyvans.models.Stop;
 import edu.vanderbilt.vandyvans.models.Van;
+import edu.vanderbilt.vandyvans.services.Clients;
 import edu.vanderbilt.vandyvans.services.Global;
-import edu.vanderbilt.vandyvans.services.VandyClients;
+import edu.vanderbilt.vandyvans.services.SyncromaticsClient;
+import edu.vanderbilt.vandyvans.services.VandyVansClient;
 
 import static edu.vanderbilt.vandyvans.services.Global.APP_LOG_ID;
 
@@ -47,7 +49,7 @@ public class MapController implements Handler.Callback,
     public static final String LOG_ID        = "MapController";
 
     private final Handler      bridge = new Handler(this);
-    private final VandyClients mClients;
+    private final Clients      mClients;
     private final Global       mGlobal;
 
     private final SupportMapFragment mMapFragment;
@@ -67,7 +69,7 @@ public class MapController implements Handler.Callback,
                          Button             blueBtn,
                          Button             redBtn,
                          Button             greenBtn,
-                         VandyClients       clients,
+                         Clients            clients,
                          Global             global) {
         if (mapFrag == null) { throw new IllegalStateException("MapFragment is null"); }
         mMapFragment = mapFrag;
@@ -95,14 +97,14 @@ public class MapController implements Handler.Callback,
      */
     @Override
     public boolean handleMessage(Message message) {
-        if (message.obj instanceof Global.WaypointResults)
-            handleWaypointResult((Global.WaypointResults) message.obj);
+        if (message.obj instanceof VandyVansClient.WaypointResults)
+            handleWaypointResult((VandyVansClient.WaypointResults) message.obj);
 
-        if (message.obj instanceof Global.StopResults)
-            handleStopResults((Global.StopResults) message.obj);
+        if (message.obj instanceof VandyVansClient.StopResults)
+            handleStopResults((VandyVansClient.StopResults) message.obj);
 
-        if (message.obj instanceof Global.VanResults)
-            handleVanResults((Global.VanResults) message.obj);
+        if (message.obj instanceof SyncromaticsClient.VanResults)
+            handleVanResults((SyncromaticsClient.VanResults) message.obj);
 
         return true;
     }
@@ -124,15 +126,15 @@ public class MapController implements Handler.Callback,
 
         // Requesting data from the services.
         Message.obtain(mClients.vandyVans(), 0,
-                       new Global.FetchWaypoints(bridge, route))
+                       new VandyVansClient.FetchWaypoints(bridge, route))
                 .sendToTarget();
 
         Message.obtain(mClients.vandyVans(), 0,
-                       new Global.FetchStops(bridge, route))
+                       new VandyVansClient.FetchStops(bridge, route))
                 .sendToTarget();
 
         Message.obtain(mClients.syncromatics(), 0,
-                       new Global.FetchVans(bridge, route))
+                       new SyncromaticsClient.FetchVans(bridge, route))
                 .sendToTarget();
 
         GoogleMap map = mMapFragment.getMap();
@@ -168,19 +170,19 @@ public class MapController implements Handler.Callback,
         routeSelected(mCurrentRoute);
     }
 
-    void handleWaypointResult(Global.WaypointResults results) {
+    void handleWaypointResult(VandyVansClient.WaypointResults results) {
         drawWaypoints(results);
     }
 
-    void handleStopResults(Global.StopResults result) {
+    void handleStopResults(VandyVansClient.StopResults result) {
         drawStops(result);
     }
 
-    void handleVanResults(Global.VanResults result) {
+    void handleVanResults(SyncromaticsClient.VanResults result) {
         drawVans(result);
     }
 
-    private boolean drawWaypoints(Global.WaypointResults result) {
+    private boolean drawWaypoints(VandyVansClient.WaypointResults result) {
         GoogleMap map = mMapFragment.getMap();
         if (map == null) { return true; }
 
@@ -197,7 +199,7 @@ public class MapController implements Handler.Callback,
         return true;
     }
 
-    private boolean drawStops(Global.StopResults result) {
+    private boolean drawStops(VandyVansClient.StopResults result) {
         GoogleMap map = mMapFragment.getMap();
         if (map == null) { return true; }
 
@@ -212,7 +214,7 @@ public class MapController implements Handler.Callback,
         return true;
     }
 
-    private boolean drawVans(Global.VanResults result) {
+    private boolean drawVans(SyncromaticsClient.VanResults result) {
         GoogleMap map = mMapFragment.getMap();
         if (map == null) { return true; }
 

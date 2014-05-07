@@ -11,8 +11,7 @@ import roboguice.activity.RoboActivity;
 import roboguice.inject.InjectView;
 
 import edu.vanderbilt.vandyvans.models.Report;
-import edu.vanderbilt.vandyvans.services.VandyClients;
-
+import edu.vanderbilt.vandyvans.services.Clients;
 
 public final class AboutsActivity extends RoboActivity {
 
@@ -24,7 +23,7 @@ public final class AboutsActivity extends RoboActivity {
     @InjectView(R.id.button2) private Button mFeedbackReport;
     @InjectView(R.id.button6) private Button mSourceCode;
 
-    @Inject VandyClients clients;
+    @Inject Clients clients;
 
     @Override
     protected void onCreate(Bundle saved) {
@@ -88,7 +87,5 @@ public final class AboutsActivity extends RoboActivity {
         Intent i = new Intent(ctx, AboutsActivity.class);
         ctx.startActivity(i);
     }
-
-
 
 }

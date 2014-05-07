@@ -27,7 +27,47 @@ import static edu.vanderbilt.vandyvans.services.Global.APP_LOG_ID;
  *
  * Created by athran on 3/16/14.
  */
-final class SyncromaticsClient implements Handler.Callback {
+public final class SyncromaticsClient implements Handler.Callback {
+
+    /**
+     * To:    Syncromatics Client
+     * Reply: `VanResults`
+     */
+    public static final class FetchVans {
+        public final Route   route;
+        public final Handler from;
+        public FetchVans(Handler _from, Route _r) {
+            route = _r;
+            from  = _from;
+        }
+    }
+
+    /**
+     * To:    Syncromatics Client
+     * Reply: `ArrivalTimeResults`
+     */
+    public static final class FetchArrivalTimes {
+        public final Stop    stop;
+        public final Handler from;
+        public FetchArrivalTimes(Handler _from, Stop _stop) {
+            stop = _stop;
+            from = _from;
+        }
+    }
+
+    public static final class VanResults {
+        public final List<Van> vans;
+        public VanResults(List<Van> _vans) {
+            vans = _vans;
+        }
+    }
+
+    public static final class ArrivalTimeResults {
+        public final List<ArrivalTime> times;
+        public ArrivalTimeResults(List<ArrivalTime> _times) {
+            times = _times;
+        }
+    }
 
     private static final String LOG_TAG  = "SyncromaticsClient";
     private static final String BASE_URL = "http://api.syncromatics.com";
@@ -35,20 +75,22 @@ final class SyncromaticsClient implements Handler.Callback {
 
     private static final JsonParser PARSER = new JsonParser();
 
+    /*package*/ SyncromaticsClient() {}
+
     @Override
     public boolean handleMessage(Message msg) {
         if (msg.obj instanceof Global.Initialize)
             return init();
 
-        else if (msg.obj instanceof Global.FetchVans)
+        else if (msg.obj instanceof FetchVans)
             return vans(
-                    ((Global.FetchVans) msg.obj).from,
-                    ((Global.FetchVans) msg.obj).route);
+                    ((FetchVans) msg.obj).from,
+                    ((FetchVans) msg.obj).route);
 
-        else if (msg.obj instanceof Global.FetchArrivalTimes)
+        else if (msg.obj instanceof FetchArrivalTimes)
             return arrivalTimes(
-                    ((Global.FetchArrivalTimes) msg.obj).from,
-                    ((Global.FetchArrivalTimes) msg.obj).stop);
+                    ((FetchArrivalTimes) msg.obj).from,
+                    ((FetchArrivalTimes) msg.obj).stop);
 
         else return false;
     }
@@ -96,7 +138,7 @@ final class SyncromaticsClient implements Handler.Callback {
             reader.close();
 
             Message.obtain(requester, 0,
-                           new Global.VanResults(result))
+                           new VanResults(result))
                     .sendToTarget();
 
         } catch (Exception e) {
@@ -121,7 +163,7 @@ final class SyncromaticsClient implements Handler.Callback {
         //Log.d(LOG_TAG, "This many Times fetched: " + result.size());
 
         Message.obtain(requester, 0,
-                       new Global.ArrivalTimeResults(result))
+                       new ArrivalTimeResults(result))
                 .sendToTarget();
 /*
         requester

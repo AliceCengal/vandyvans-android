@@ -11,7 +11,6 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Formatter;
-import java.util.List;
 import java.util.Map;
 
 import android.content.Context;
@@ -30,11 +29,7 @@ import com.parse.Parse;
 import edu.vanderbilt.vandyvans.R;
 import edu.vanderbilt.vandyvans.ReminderController;
 import edu.vanderbilt.vandyvans.models.Routes;
-import edu.vanderbilt.vandyvans.models.ArrivalTime;
-import edu.vanderbilt.vandyvans.models.FloatPair;
 import edu.vanderbilt.vandyvans.models.Route;
-import edu.vanderbilt.vandyvans.models.Stop;
-import edu.vanderbilt.vandyvans.models.Van;
 
 /**
  * Holds static references to the vital backend services which are accessible
@@ -53,7 +48,7 @@ public final class Global extends android.app.Application {
     public static final String APP_LOG_ID        = "VandyVans";
     public static final String APP_PREFERENCES   = "VandyVansPreferences";
 
-    private VandyClientsSingleton    mClientSingleton;
+    private ClientsSingleton         mClientSingleton;
     private SimpleReminderController mReminderController;
 
     private int COLOR_RED;
@@ -98,8 +93,6 @@ public final class Global extends android.app.Application {
         return true;
     }
 
-
-
     /**
      * Called in the `onCreate` of android.app.Application when the process
      * for this app is first created. This will initialize the service
@@ -112,7 +105,7 @@ public final class Global extends android.app.Application {
         thread.start();
 
         // Create an Object to hold on to the services.
-        mClientSingleton = new VandyClientsSingleton(thread, this);
+        mClientSingleton = new ClientsSingleton(thread, this);
         mReminderController = new SimpleReminderController(this);
 
         mReminderController.start();
@@ -126,12 +119,12 @@ public final class Global extends android.app.Application {
                 new Module() {
                     @Override
                     public void configure(Binder binder) {
-                        binder.bind(VandyClients.class)
+                        binder.bind(Clients.class)
 
                                 // inject the fucking injector!
-                                .toProvider(new Provider<VandyClients>() {
+                                .toProvider(new Provider<Clients>() {
                                     @Override
-                                    public VandyClients get() {
+                                    public Clients get() {
                                         return mClientSingleton;
                                     }
                                 });
@@ -156,12 +149,12 @@ public final class Global extends android.app.Application {
 
     }
 
-    private static final class VandyClientsSingleton implements VandyClients {
+    private static final class ClientsSingleton implements Clients {
 
         final Handler vandyVansClient;
         final Handler syncromaticsClient;
 
-        VandyClientsSingleton(HandlerThread serviceThread, Context ctx) {
+        ClientsSingleton(HandlerThread serviceThread, Context ctx) {
             vandyVansClient = new Handler(serviceThread.getLooper(),
                                           new VandyVansClient());
             Message.obtain(vandyVansClient, 0,
@@ -184,88 +177,7 @@ public final class Global extends android.app.Application {
         }
     }
 
-    /**
-     * Signal for requesting Stop data from the VandyVans.com API.
-     *
-     * Reply: `StopResults`
-     *
-     * @author athran
-     */
-    public static final class FetchStops {
-        public final Route   route;
-        public final Handler from;
-        public FetchStops(Handler _from, Route _r) {
-            route = _r;
-            from  = _from;
-        }
-    }
 
-    /**
-     * To:    VandyVans Client
-     * Reply: `WaypointResults`
-     */
-    public static final class FetchWaypoints {
-        public final Route   route;
-        public final Handler from;
-        public FetchWaypoints(Handler _from, Route _r) {
-            route = _r;
-            from  = _from;
-        }
-    }
-    
-    public static final class StopResults {
-        public final List<Stop> stops;
-        public StopResults(List<Stop> list) {
-            stops = list;
-        }
-    }
-    
-    public static final class WaypointResults {
-        public final List<FloatPair> waypoints;
-        public WaypointResults(List<FloatPair> _waypoints) {
-            waypoints = _waypoints;
-        }
-    }
-
-    /**
-     * To:    Syncromatics Client
-     * Reply: `VanResults`
-     */
-    public static final class FetchVans {
-        public final Route   route;
-        public final Handler from;
-        public FetchVans(Handler _from, Route _r) {
-            route = _r;
-            from  = _from;
-        }
-    }
-
-    /**
-     * To:    Syncromatics Client
-     * Reply: `ArrivalTimeResults`
-     */
-    public static final class FetchArrivalTimes {
-        public final Stop    stop;
-        public final Handler from;
-        public FetchArrivalTimes(Handler _from, Stop _stop) {
-            stop = _stop;
-            from = _from;
-        }
-    }
-    
-    public static final class VanResults {
-        public final List<Van> vans;
-        public VanResults(List<Van> _vans) {
-            vans = _vans;
-        }
-    }
-    
-    public static final class ArrivalTimeResults {
-        public final List<ArrivalTime> times;
-        public ArrivalTimeResults(List<ArrivalTime> _times) {
-            times = _times;
-        }
-    }
 
     public static final class Failure {
         public final Object    originalMessage;
