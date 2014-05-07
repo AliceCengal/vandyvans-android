@@ -188,7 +188,7 @@ public class ReminderService extends Service implements Handler.Callback {
                 logMessage("Initing for stopId: " + stopId);
                 isTracking = true;
                 Message.obtain(syncroClient, 0,
-                               new Global.FetchArrivalTimes(this,
+                               new SyncromaticsClient.FetchArrivalTimes(this,
                                                             Stops.getForId(stopId)))
                         .sendToTarget();
             }
@@ -203,8 +203,9 @@ public class ReminderService extends Service implements Handler.Callback {
                                    this).sendToTarget();
                 }
             }
-            if (msg.obj instanceof Global.ArrivalTimeResults) {
-                handleArrivalTimes(((Global.ArrivalTimeResults) msg.obj).times);
+            if (msg.obj instanceof SyncromaticsClient.ArrivalTimeResults) {
+                handleArrivalTimes(
+                        ((SyncromaticsClient.ArrivalTimeResults) msg.obj).times);
             }
         }
 
