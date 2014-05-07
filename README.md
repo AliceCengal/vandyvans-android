@@ -51,7 +51,7 @@ export ANDROID_SDK=/home/{path_to_the_folder}/sdk
 
 * Install Google Play Services into your Maven repo
   - https://github.com/JakeWharton/gms-mvn-install
-  - This step requires Maven 3.1.1, so switched your version temporarily.
+  - This step requires Maven 3.1.1, so switch your version temporarily.
   - run the script with 7 appended to indicate that version should be installed.
 
           ./gms-mvn-install.sh 7
@@ -78,7 +78,8 @@ You can build using Maven:
 
 ## Run
 
-Deploy to an Android virtual device (AVD):
+Deploy to an Android virtual device (AVD) or your device connected by USB:
 
     $ mvn android:deploy
 
+In order for this to work, `adb devices` must return a list of device IDs.

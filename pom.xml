@@ -12,6 +12,11 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>Vandy Vans</name>
 
+    <properties>
+        <scala.version>2.10.3</scala.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <!--
     Adding jar locally
     http://stackoverflow.com/a/7623805
