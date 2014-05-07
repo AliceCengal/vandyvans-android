@@ -214,11 +214,13 @@ final class VandyVansClient implements Handler.Callback {
 
     private static List<FloatPair> parseWaypointResult(Reader reader) {
         List<FloatPair> result = new LinkedList<FloatPair>();
-        for (JsonElement elem : PARSER.parse(reader).getAsJsonArray()) {
-            JsonObject obj = elem.getAsJsonObject();
-            result.add(new FloatPair(
-                    obj.get(FloatPair.TAG_LAT).getAsDouble(),
-                    obj.get(FloatPair.TAG_LON).getAsDouble()));
+        for (JsonElement arr : PARSER.parse(reader).getAsJsonArray()) {
+            for (JsonElement elem : arr.getAsJsonArray()) {
+                JsonObject obj = elem.getAsJsonObject();
+                result.add(new FloatPair(
+                        obj.get(FloatPair.TAG_LAT).getAsDouble(),
+                        obj.get(FloatPair.TAG_LON).getAsDouble()));
+            }
         }
 
         return result;
