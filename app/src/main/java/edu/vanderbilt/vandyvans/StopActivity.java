@@ -62,8 +62,12 @@ public final class StopActivity extends RoboFragmentActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_stop);
 
+        Foo f = new Foo();
+
+
         // Set up the action bar.
         final ActionBar actionBar = getActionBar();
+        actionBar.setTitle(f.bar());
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
         // Initialization of the map with proper settings
