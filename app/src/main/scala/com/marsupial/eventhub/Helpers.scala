@@ -55,6 +55,21 @@ object Helpers {
 
   }
 
+  trait EasySupportFragment {
+    self: android.support.v4.app.Fragment =>
+
+    def layoutId: Int
+
+    override def onCreateView(inflater:  LayoutInflater,
+                              container: ViewGroup,
+                              saved:     Bundle): View = {
+      inflater.inflate(layoutId, container, false)
+    }
+
+    def component[T](id: Int) = getView.findViewById(id).asInstanceOf[T]
+
+  }
+
   /**
    * This mixin provide boilerplate free Fragment transactions.
    */

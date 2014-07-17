@@ -79,6 +79,25 @@ trait ChattyFragment extends Fragment
 
 }
 
+trait ChattySupportFragment extends android.support.v4.app.Fragment
+                                    with ActorConversion
+{
+  self: Handler.Callback with AppInjection[_ <: EventfulApp] =>
+
+  implicit lazy val communicator = new Handler(this)
+
+  override def onStart() {
+    super.onStart()
+    app.eventHub request EventHub.Subscribe
+  }
+
+  override def onStop() {
+    super.onStop()
+    app.eventHub request EventHub.Unsubscribe
+  }
+
+}
+
 /**
  * Same as ChattyFragment, but for Activity.
  */

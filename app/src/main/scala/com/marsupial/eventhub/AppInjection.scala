@@ -8,6 +8,7 @@ trait AppInjection[APP <: EventfulApp] {
   def app = this match {
     case a: Activity => a.getApplication.asInstanceOf[APP]
     case f: Fragment => f.getActivity.getApplication.asInstanceOf[APP]
+    case f: android.support.v4.app.Fragment => f.getActivity.getApplication.asInstanceOf[APP]
     case _           => throw new IllegalStateException(INHERITANCE_ERROR)
   }
 

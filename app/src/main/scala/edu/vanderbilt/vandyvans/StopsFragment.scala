@@ -1,24 +1,23 @@
 package edu.vanderbilt.vandyvans
 
 import android.support.v4.app.Fragment
+import com.marsupial.eventhub.Helpers
 
 import scala.collection.JavaConversions._
 
 import android.os.Bundle
-import android.view.{View, ViewGroup, LayoutInflater}
+import android.view.View
 import android.widget.{ListView, AdapterView}
 
 import edu.vanderbilt.vandyvans.models.{Stop, Stops}
 
-class StopsFragment extends Fragment with AdapterView.OnItemClickListener {
+class StopsFragment extends Fragment
+                    with AdapterView.OnItemClickListener
+                    with Helpers.EasySupportFragment
+{
+  override def layoutId = R.layout.fragment_stop
 
-  private def stopList = getView.findViewById(R.id.listView1).asInstanceOf[ListView]
-
-  override def onCreateView(inflater: LayoutInflater,
-                            container: ViewGroup,
-                            saved: Bundle) = {
-    inflater.inflate(R.layout.fragment_stop, container, false)
-  }
+  private def stopList = component[ListView](R.id.listView1)
 
   override def onActivityCreated(saved: Bundle) {
     super.onActivityCreated(saved)
