@@ -33,10 +33,6 @@
     <string name="graphics_design">GRAPHIC DESIGN BY:</string>
     <string name="creator">Athran Rahman</string>
     <string name="designer">Fletcher Young</string>
-    
-    <string name="notification_setting">Notification Settings</string>
-
-    <string name="location_setting">Location Settings</string>
 
     <string name="sourcecode_statement">VandyApps is a free open-source software under the Batman license. The source code is available at:</string>
     <string name="sourcecode_link">https://github.com/VandyApps/vandyvans-android</string>
