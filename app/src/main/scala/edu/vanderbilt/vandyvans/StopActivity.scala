@@ -10,11 +10,14 @@ import android.view.{KeyEvent, MenuItem, Menu}
 import android.widget.{Button, LinearLayout}
 import com.google.android.gms.maps.model.{LatLng, CameraPosition}
 import com.google.android.gms.maps.{GoogleMapOptions, SupportMapFragment}
+
+import com.marsupial.eventhub.AppInjection
 import com.marsupial.eventhub.Helpers.EasyActivity
-import edu.vanderbilt.vandyvans.services.{Global, Clients}
+import edu.vanderbilt.vandyvans.services.Global
 
-class StopActivity extends FragmentActivity with ActionBar.TabListener with EasyActivity {
-
+class StopActivity extends FragmentActivity
+    with ActionBar.TabListener with EasyActivity with AppInjection[Global]
+{
   lazy val stopFragment = new StopsFragment
   lazy val pagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager)
 
@@ -26,9 +29,6 @@ class StopActivity extends FragmentActivity with ActionBar.TabListener with Easy
   def redButton = component[Button](R.id.btn_red)
   def greenButton = component[Button](R.id.btn_green)
   def viewPager = component[ViewPager](R.id.pager)
-
-  val clients: Clients = null
-  val globals: Global = null
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
@@ -45,7 +45,7 @@ class StopActivity extends FragmentActivity with ActionBar.TabListener with Easy
 
     mapController = new MapController(mapFrag, bar,
                                       blueButton, redButton, greenButton,
-                                      clients, globals)
+                                      app, app)
 
     viewPager.setAdapter(pagerAdapter)
     viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {

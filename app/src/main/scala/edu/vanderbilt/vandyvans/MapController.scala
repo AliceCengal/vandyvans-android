@@ -1,5 +1,7 @@
 package edu.vanderbilt.vandyvans
 
+import com.marsupial.eventhub.ActorConversion
+
 import scala.collection.JavaConversions._
 
 import android.os.{Message, Handler}
@@ -15,7 +17,7 @@ import edu.vanderbilt.vandyvans.services.{SyncromaticsClient, VandyVansClient, G
 class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayout,
                     val blueBtn: Button, val redBtn: Button, val greenBtn: Button,
                     val clients: Clients, val global: Global)
-  extends Handler.Callback with View.OnClickListener
+  extends Handler.Callback with View.OnClickListener with ActorConversion
 {
   import MapController._
   import VandyVansClient._
@@ -45,21 +47,16 @@ class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayou
     overlayBar.setBackgroundColor(global.getColorFor(currentRoute))
 
     // Requesting data from the services.
-    Message.obtain(clients.vandyVans(), 0, new FetchWaypoints(bridge, route))
-      .sendToTarget()
+    clients.vandyVans ! new FetchWaypoints(bridge, route)
+    clients.vandyVans ! new FetchStops(bridge, route)
+    clients.syncromatics ! new FetchVans(bridge, route)
 
-    Message.obtain(clients.vandyVans(), 0, new FetchStops(bridge, route))
-      .sendToTarget()
+    Option(mMapFragment.getMap).foreach { map =>
+      map.clear()
+      map.animateCamera(getDefaultCameraUpdate())
+      map.setMyLocationEnabled(true)
+    }
 
-    Message.obtain(clients.syncromatics(), 0, new FetchVans(bridge, route))
-      .sendToTarget()
-
-    val map = mMapFragment.getMap()
-    if (map == null) { return; }
-
-    map.clear()
-    map.animateCamera(getDefaultCameraUpdate())
-    map.setMyLocationEnabled(true)
   }
 
   override def onClick(view: View) {

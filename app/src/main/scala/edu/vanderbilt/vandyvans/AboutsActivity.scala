@@ -5,12 +5,16 @@ import android.content.{Context, Intent}
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+import com.marsupial.eventhub.{ChattyActivity, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
 import edu.vanderbilt.vandyvans.models.Report
-import edu.vanderbilt.vandyvans.services.Clients
+import edu.vanderbilt.vandyvans.services.{Global, Clients}
 
-class AboutsActivity extends Activity with EasyActivity {
-
+class AboutsActivity extends Activity
+    with EasyActivity
+    with AppInjection[Global]
+    with ChattyActivity
+{
   val TAG_FORMTYPE = "formtype"
   val TAG_BUG = 1000
   val TAG_FEED = 1111
@@ -19,7 +23,7 @@ class AboutsActivity extends Activity with EasyActivity {
   def feedbackReport = component[Button](R.id.button2)
   def sourceCode = component[Button](R.id.button6)
 
-  val clients: Clients = null
+  val clients: Clients = app
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
@@ -49,17 +53,11 @@ class AboutsActivity extends Activity with EasyActivity {
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     if (resultCode != Activity.RESULT_CANCELED) {
-
-         clients.vandyVans()
-                .obtainMessage(
-                        0,
-                        new Report(
-                                data.getIntExtra(TAG_FORMTYPE, TAG_FEED) == TAG_BUG,
-                                data.getStringExtra(FormActivity.RESULT_EMAIL),
-                                data.getStringExtra(FormActivity.RESULT_BODY),
-                                false))
-                .sendToTarget()
-
+      clients.vandyVans ! new Report(
+          data.getIntExtra(TAG_FORMTYPE, TAG_FEED) == TAG_BUG,
+          data.getStringExtra(FormActivity.RESULT_EMAIL),
+          data.getStringExtra(FormActivity.RESULT_BODY),
+          false)
     }
   }
 

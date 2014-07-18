@@ -12,6 +12,7 @@ import android.util.Log;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.marsupial.eventhub.Initialize;
 
 import edu.vanderbilt.vandyvans.models.ArrivalTime;
 import edu.vanderbilt.vandyvans.models.FloatPair;
@@ -19,8 +20,6 @@ import edu.vanderbilt.vandyvans.models.Route;
 import edu.vanderbilt.vandyvans.models.Routes;
 import edu.vanderbilt.vandyvans.models.Stop;
 import edu.vanderbilt.vandyvans.models.Van;
-
-import static edu.vanderbilt.vandyvans.services.Global.APP_LOG_ID;
 
 /**
  * Implements the requests to the `api.syncromatics.com` server.
@@ -79,7 +78,7 @@ public final class SyncromaticsClient implements Handler.Callback {
 
     @Override
     public boolean handleMessage(Message msg) {
-        if (msg.obj instanceof Global.Initialize)
+        if (msg.obj instanceof Initialize)
             return init();
 
         else if (msg.obj instanceof FetchVans)
@@ -96,7 +95,7 @@ public final class SyncromaticsClient implements Handler.Callback {
     }
 
     private boolean init() {
-        Log.d(APP_LOG_ID, LOG_TAG + " | Initialization");
+        Log.d(Global.APP_LOG_ID(), LOG_TAG + " | Initialization");
         return true;
     }
 
@@ -142,9 +141,9 @@ public final class SyncromaticsClient implements Handler.Callback {
                     .sendToTarget();
 
         } catch (Exception e) {
-            Log.e(APP_LOG_ID, LOG_TAG + " | Failed to get Vans for Route.");
-            Log.e(APP_LOG_ID, LOG_TAG + " | URL: " + buffer.toString());
-            Log.e(APP_LOG_ID, e.getMessage());
+            Log.e(Global.APP_LOG_ID(), LOG_TAG + " | Failed to get Vans for Route.");
+            Log.e(Global.APP_LOG_ID(), LOG_TAG + " | URL: " + buffer.toString());
+            Log.e(Global.APP_LOG_ID(), e.getMessage());
         }
         return true;
     }
