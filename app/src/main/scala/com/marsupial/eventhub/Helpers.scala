@@ -1,6 +1,7 @@
 package com.marsupial.eventhub
 
 import android.app.{FragmentTransaction, Activity, Fragment}
+import android.view.View.OnClickListener
 import android.view.{View, ViewGroup, LayoutInflater}
 import android.os.Bundle
 
@@ -73,8 +74,10 @@ object Helpers {
   /**
    * This mixin provide boilerplate free Fragment transactions.
    */
-  trait EasyActivity {
+  trait EasyActivity extends ListenerConversion {
     self: Activity =>
+
+    def component[T](id: Int) = findViewById(id).asInstanceOf[T]
 
     def transaction(action: FragmentTransaction => Unit) {
       val ft = getFragmentManager.beginTransaction()
@@ -84,4 +87,10 @@ object Helpers {
 
   }
 
+  trait ListenerConversion {
+    implicit def funcToClickListener(func: View=>Unit): View.OnClickListener =
+        new OnClickListener {
+          override def onClick(v: View): Unit = { func(v) }
+        }
+  }
 }
