@@ -1,5 +1,7 @@
 package edu.vanderbilt.vandyvans
 
+import scala.collection.JavaConversions._
+
 import android.app.Activity
 import android.content.{Intent, Context}
 import android.os.{Message, Bundle, Handler}
@@ -68,7 +70,7 @@ class DetailActivity extends Activity with EasyActivity with Handler.Callback {
     false
   }
 
-  def displayArrivalTimes(times: Seq[ArrivalTime]) {
+  def displayArrivalTimes(times: Iterable[ArrivalTime]) {
     arrivalLoading.setVisibility(View.GONE)
     if (times.isEmpty) {
       failureText.setVisibility(View.VISIBLE)

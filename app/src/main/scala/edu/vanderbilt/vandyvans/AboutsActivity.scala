@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.{Context, Intent}
 import android.os.Bundle
 import android.view.View
-import android.view.View.OnClickListener
 import android.widget.Button
 import com.marsupial.eventhub.Helpers.EasyActivity
 import edu.vanderbilt.vandyvans.models.Report
@@ -48,7 +47,7 @@ class AboutsActivity extends Activity with EasyActivity {
 
   }
 
-  override def onActivityResult(requestCode: Int, resultCode: Int, data: Int) {
+  override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     if (resultCode != Activity.RESULT_CANCELED) {
 
          clients.vandyVans()

@@ -50,7 +50,7 @@ class FormActivity extends Activity with EasyActivity {
 
 object FormActivity {
   val TAG_FORMTITLE     = "form_title"
-  val TAG_FORMBODY_HINT = "form_body_hint"
+  val TAG_FORMBODYHINT = "form_body_hint"
   val RESULT_EMAIL      = "result_email"
   val RESULT_BODY       = "result_body"
   val RESULT_EXIST      = 9090
@@ -59,6 +59,6 @@ object FormActivity {
 
   def readConfig(args: Bundle) =
     FormConfig(title = args.getString(TAG_FORMTITLE),
-               hint  = args.getString(TAG_FORMBODY_HINT))
+               hint  = args.getString(TAG_FORMBODYHINT))
 
 }
