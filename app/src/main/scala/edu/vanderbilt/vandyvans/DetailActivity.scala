@@ -1,7 +1,5 @@
 package edu.vanderbilt.vandyvans
 
-import scala.collection.JavaConversions._
-
 import android.app.Activity
 import android.content.{Intent, Context}
 import android.os.{Message, Bundle, Handler}
@@ -9,7 +7,7 @@ import android.view.View
 import android.widget._
 
 import com.marsupial.eventhub.Helpers.EasyActivity
-import edu.vanderbilt.vandyvans.models.{Routes, ArrivalTime, Stops, Stop}
+import edu.vanderbilt.vandyvans.models.{Route, ArrivalTime, Stop}
 import edu.vanderbilt.vandyvans.services.{ReminderController, Global, Clients}
 import com.marsupial.eventhub.{ChattyActivity, AppInjection}
 import edu.vanderbilt.vandyvans.services.SyncromaticsClient._
@@ -60,7 +58,7 @@ class DetailActivity extends Activity
         case n => n
       }
 
-    stop = Stops.getForId(stopId)
+    stop = Stop.forId(stopId).get // fix
     Option(getActionBar).foreach { _.setTitle(stop.name) }
 
     apiClient.syncromatics ? FetchArrivalTimes(stop)
@@ -81,13 +79,13 @@ class DetailActivity extends Activity
     } else {
       times.foreach { time =>
         time.route match {
-          case Routes.BLUE =>
+          case Route.BLUE =>
             blueGroup.displayTime(time.minutes)
             blueGroup.show()
-          case Routes.GREEN =>
+          case Route.GREEN =>
             greenGroup.displayTime(time.minutes)
             greenGroup.show()
-          case Routes.RED =>
+          case Route.RED =>
             redGroup.displayTime(time.minutes)
             redGroup.show()
         }

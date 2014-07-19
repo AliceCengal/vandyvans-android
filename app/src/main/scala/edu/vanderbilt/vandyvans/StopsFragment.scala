@@ -1,14 +1,12 @@
 package edu.vanderbilt.vandyvans
 
-import scala.collection.JavaConversions._
-
 import android.support.v4.app.Fragment
 import android.os.Bundle
 import android.view.View
 import android.widget.{ListView, AdapterView}
 
 import com.marsupial.eventhub.Helpers
-import edu.vanderbilt.vandyvans.models.{Stop, Stops}
+import edu.vanderbilt.vandyvans.models.Stop
 
 class StopsFragment extends Fragment
                     with AdapterView.OnItemClickListener
@@ -20,10 +18,10 @@ class StopsFragment extends Fragment
 
   override def onActivityCreated(saved: Bundle) {
     super.onActivityCreated(saved)
-    val shortList = Stops.getShortList :+ Stops.buildSimpleStop(-1, "Other Stops")
+    val shortList = Stop.getShortList :+ Stop(-1, "Other Stops")
 
     stopList.setAdapter(ArrayAdapterBuilder
-        .fromCollection(shortList)
+        .fromCollection(shortList.toArray)
         .withContext(getActivity)
         .withResource(R.layout.simple_text)
         .withStringer(StopToString)
@@ -39,7 +37,7 @@ class StopsFragment extends Fragment
     val selectedStop = adapter.getItemAtPosition(position).asInstanceOf[Stop]
     if (selectedStop.id == -1) {
       stopList.setAdapter(ArrayAdapterBuilder
-          .fromCollection(Stops.getAll)
+          .fromCollection(Stop.getAll.toArray)
           .withContext(getActivity)
           .withResource(R.layout.simple_text)
           .withStringer(StopToString)

@@ -40,9 +40,8 @@ object VandyVansClient {
   def extractStop(json: JsonElement): List[Stop] = {
 
     def buildFromJson(jsonObj: JsonObject): Stop =
-      Stops.buildSimpleStop(
-        jsonObj.get(Stop.TAG_ID).getAsInt,
-        jsonObj.get(Stop.TAG_NAME).getAsString)
+      Stop(id = jsonObj.get(Stop.TAG_ID).getAsInt,
+           name = jsonObj.get(Stop.TAG_NAME).getAsString)
 
     json match {
       case j if j.isJsonArray =>

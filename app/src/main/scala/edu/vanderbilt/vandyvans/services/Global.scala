@@ -8,7 +8,7 @@ import com.parse.Parse
 
 import com.marsupial.eventhub.{Initialize, EventfulApp}
 import edu.vanderbilt.vandyvans.R
-import edu.vanderbilt.vandyvans.models.{Routes, Route}
+import edu.vanderbilt.vandyvans.models.Route
 
 class Global extends android.app.Application with EventfulApp with Clients {
 
@@ -19,9 +19,9 @@ class Global extends android.app.Application with EventfulApp with Clients {
   lazy val syncromatics = new Handler(serviceThread.getLooper, new SyncromaticsClient)
 
   def getColorFor(route: Route) = route match {
-    case Routes.BLUE => getResources.getColor(R.color.blue_argb)
-    case Routes.RED => getResources.getColor(R.color.red_argb)
-    case Routes.GREEN => getResources.getColor(R.color.green_argb)
+    case Route.BLUE => getResources.getColor(R.color.blue_argb)
+    case Route.RED => getResources.getColor(R.color.red_argb)
+    case Route.GREEN => getResources.getColor(R.color.green_argb)
     case _ => getResources.getColor(android.R.color.black)
   }
 

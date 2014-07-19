@@ -3,7 +3,6 @@ package edu.vanderbilt.vandyvans.services
 import edu.vanderbilt.vandyvans.R
 
 import scala.ref.WeakReference
-import scala.collection.JavaConversions._
 
 import android.app.{Notification, NotificationManager, Service}
 import android.content.{Context, Intent}
@@ -11,7 +10,7 @@ import android.os._
 import android.util.Log
 
 import com.marsupial.eventhub.ActorConversion
-import edu.vanderbilt.vandyvans.models.{Stops, ArrivalTime}
+import edu.vanderbilt.vandyvans.models.{Stop, ArrivalTime}
 import SyncromaticsClient._
 
 
@@ -126,7 +125,8 @@ object ReminderService {
       if (msg.what == INIT) {
         logMessage(s"Initing for stopId: $id")
         isTracking = true
-        syncro ? FetchArrivalTimes(Stops.getForId(id))
+        Stop.forId(id).foreach { stop => syncro ? FetchArrivalTimes(stop) }
+
 
       } else if (msg.what == NOTIFY_PARENT) {
         if (isTracking) {

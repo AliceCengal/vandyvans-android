@@ -2,8 +2,6 @@ package edu.vanderbilt.vandyvans
 
 import com.marsupial.eventhub.ActorConversion
 
-import scala.collection.JavaConversions._
-
 import android.os.{Message, Handler}
 import android.view.View
 import android.widget.{Button, LinearLayout}
@@ -11,7 +9,7 @@ import android.widget.{Button, LinearLayout}
 import com.google.android.gms.maps.model.{PolylineOptions, BitmapDescriptorFactory, MarkerOptions, LatLng}
 import com.google.android.gms.maps.{CameraUpdateFactory, SupportMapFragment}
 
-import edu.vanderbilt.vandyvans.models.{Route, Routes}
+import edu.vanderbilt.vandyvans.models.Route
 import edu.vanderbilt.vandyvans.services.{SyncromaticsClient, VandyVansClient, Global, Clients}
 
 class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayout,
@@ -24,7 +22,7 @@ class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayou
   import SyncromaticsClient._
 
   implicit lazy val bridge = new Handler(this)
-  var currentRoute = Routes.BLUE
+  var currentRoute = Route.BLUE
 
   lazy val defaultCamera =
     CameraUpdateFactory.newLatLngZoom(
@@ -61,9 +59,9 @@ class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayou
 
   override def onClick(view: View) {
     val select = view match {
-      case blueButton if currentRoute != Routes.BLUE => Routes.BLUE
-      case redButton if currentRoute != Routes.RED => Routes.RED
-      case greenButton if currentRoute != Routes.GREEN => Routes.GREEN
+      case blueButton if currentRoute != Route.BLUE => Route.BLUE
+      case redButton if currentRoute != Route.RED => Route.RED
+      case greenButton if currentRoute != Route.GREEN => Route.GREEN
     }
     routeSelected(select)
   }

@@ -77,7 +77,7 @@ private[services] class SyncromaticsClient
         }
       }
 
-      val results = Routes.getAll.flatMap { readArrivalTime } .toList
+      val results = Route.getAll.flatMap { readArrivalTime } .toList
       requester ! ArrivalTimeResults(results)
 
     case _ =>
