@@ -1,6 +1,5 @@
 package edu.vanderbilt.vandyvans.services
 
-import java.io.InputStreamReader
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
 import scala.io.Source
@@ -19,7 +18,7 @@ object VandyVansClient {
   case class FetchStops(route: Route)
   case class FetchWaypoints(route: Route)
   case class StopResults(stops: List[Stop])
-  case class WaypointResults(waypoints: List[(Double,Double)])
+  case class WaypointResults(waypoints: List[FloatPair])
 
   private val LOG_TAG    = "VandyVansClient"
   private val BASE_URL   = "http://vandyvans.com"
@@ -42,8 +41,8 @@ object VandyVansClient {
 
     def buildFromJson(jsonObj: JsonObject): Stop =
       Stops.buildSimpleStop(
-        stopObj.get(Stop.TAG_ID).getAsInt,
-        stopObj.get(Stop.TAG_NAME).getAsString)
+        jsonObj.get(Stop.TAG_ID).getAsInt,
+        jsonObj.get(Stop.TAG_NAME).getAsString)
 
     json match {
       case j if j.isJsonArray =>
@@ -65,6 +64,7 @@ object VandyVansClient {
         new FloatPair(
           obj.get(FloatPair.TAG_LAT).getAsDouble,
           obj.get(FloatPair.TAG_LON).getAsDouble) }
+      .toList
   }
 
 }
@@ -93,7 +93,7 @@ private[services] class VandyVansClient extends Handler.Callback with Server {
         } catch {
           case NonFatal(e) =>
             Log.e(Global.APP_LOG_ID, LOG_TAG + " | Failed to get Stops for Route.")
-            Log.e(Global.APP_LOG_ID, LOG_TAG + " | URL: " + buffer.toString)
+            Log.e(Global.APP_LOG_ID, LOG_TAG + " | URL: " + requestUrl)
             Log.e(Global.APP_LOG_ID, e.getMessage)
         }
       }
@@ -125,18 +125,18 @@ private[services] class VandyVansClient extends Handler.Callback with Server {
           val raw = Source.fromInputStream(Global.get(requestUrl)).mkString
           val result = extractWaypoints(PARSER.parse(raw))
 
-          requester ! StopResults(result)
+          requester ! WaypointResults(result)
           storeCacheRawDataUpdateDate(cacheId, raw, dateCacheId)
         } catch {
           case NonFatal(e) =>
             Log.e(Global.APP_LOG_ID, LOG_TAG + " | Failed to get Stops for Route.")
-            Log.e(Global.APP_LOG_ID, LOG_TAG + " | URL: " + buffer.toString)
+            Log.e(Global.APP_LOG_ID, LOG_TAG + " | URL: " + requestUrl)
             Log.e(Global.APP_LOG_ID, e.getMessage)
         }
       }
 
       if (prefs.contains(cacheId)) {
-        if (!isCacheExpired(cacheDateId)) {
+        if (!isCacheExpired(dateCacheId)) {
           val result = extractStop(PARSER.parse(prefs.getString(cacheId, "")))
           if (result.isEmpty) {
             invalidateCache(cacheId)
@@ -153,7 +153,7 @@ private[services] class VandyVansClient extends Handler.Callback with Server {
       }
 
     case r: Report => postReportUsingParseApi(r)
-      
+
     case _ =>
   }
 
@@ -168,7 +168,7 @@ private[services] class VandyVansClient extends Handler.Callback with Server {
 
   private def isCacheExpired(cacheDateId: String) = {
     val currentTime = System.currentTimeMillis()
-    val cacheDate = prefs.getLong(cacheDate, currentTime)
+    val cacheDate = prefs.getLong(cacheDateId, currentTime)
     (currentTime - cacheDate) > CACHE_EXPIRATION
   }
 

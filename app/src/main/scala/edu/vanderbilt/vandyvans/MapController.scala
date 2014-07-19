@@ -23,7 +23,7 @@ class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayou
   import VandyVansClient._
   import SyncromaticsClient._
 
-  lazy val bridge = new Handler(this)
+  implicit lazy val bridge = new Handler(this)
   var currentRoute = Routes.BLUE
 
   lazy val defaultCamera =
@@ -47,9 +47,9 @@ class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayou
     overlayBar.setBackgroundColor(global.getColorFor(currentRoute))
 
     // Requesting data from the services.
-    clients.vandyVans ! new FetchWaypoints(bridge, route)
-    clients.vandyVans ! new FetchStops(bridge, route)
-    clients.syncromatics ! new FetchVans(bridge, route)
+    clients.vandyVans ? FetchWaypoints(route)
+    clients.vandyVans ? FetchStops(route)
+    clients.syncromatics ? FetchVans(route)
 
     Option(mapFrag.getMap).foreach { map =>
       map.clear()
@@ -105,8 +105,6 @@ class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayou
         .anchor(0.5f, 0.5f))
     }
   }
-
-  def getDefaultCameraUpdate = defaultCamera
 
 }
 

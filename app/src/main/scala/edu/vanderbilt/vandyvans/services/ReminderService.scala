@@ -120,12 +120,13 @@ object ReminderService {
   {
     var isTracking = true
     var latestArrivalTime = Option.empty[ArrivalTime]
+    implicit val handler: Handler = this
 
     override def handleMessage(msg: Message) {
       if (msg.what == INIT) {
         logMessage(s"Initing for stopId: $id")
         isTracking = true
-        syncro ! new FetchArrivalTimes(this, Stops.getForId(id))
+        syncro ? FetchArrivalTimes(Stops.getForId(id))
 
       } else if (msg.what == NOTIFY_PARENT) {
         if (isTracking) {
@@ -133,8 +134,11 @@ object ReminderService {
           Message.obtain(parent, VAN_IS_ARRIVEN, this).sendToTarget()
         }
 
-      } else if (msg.obj.isInstanceOf[ArrivalTimeResults]) {
-        handleArrivalTimes(msg.obj.asInstanceOf[ArrivalTimeResults].times)
+      } else {
+        msg.obj match { case o: ArrivalTimeResults =>
+          handleArrivalTimes(o.times)
+        }
+
       }
     }
 

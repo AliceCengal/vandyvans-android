@@ -87,7 +87,7 @@ class SimpleReminderController(val ctx: Context)
   private def doSubscribe(stop: Int) {
     serviceHandler.foreach { messenger =>
       try {
-        messenger.send(Message.obtain(null, ReminderService.SUBSCRIBE_TO_STOP), stop, 0)
+        messenger.send(Message.obtain(null, ReminderService.SUBSCRIBE_TO_STOP, stop, 0))
       } catch {
         case _: RemoteException => logMessage("Failed to communicate with ReminderService")
       }

@@ -1,6 +1,6 @@
 package edu.vanderbilt.vandyvans.services
 
-import java.util.logging.Handler
+import android.os.Handler
 
 trait Clients {
   def vandyVans: Handler

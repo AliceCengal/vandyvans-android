@@ -5,6 +5,7 @@ import android.content.{Context, Intent}
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
+
 import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
 import edu.vanderbilt.vandyvans.models.Report

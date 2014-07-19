@@ -16,7 +16,7 @@ object SyncromaticsClient {
   case class FetchVans(route: Route)
   case class FetchArrivalTimes(stop: Stop)
   case class VanResults(vans: List[Van])
-  case class ArrivalTimeResults(times: List[Van])
+  case class ArrivalTimeResults(times: List[ArrivalTime])
 
   private val LOG_TAG  = "SyncromaticsClient"
   private val BASE_URL = "http://api.syncromatics.com"
@@ -39,7 +39,8 @@ private[services] class SyncromaticsClient
         val reader = new InputStreamReader(Global.get(requestUrl))
         val result =
           PARSER.parse(reader).getAsJsonArray
-            .map { elem.getAsJsonObject }
+            .toList
+            .map { _.getAsJsonObject }
             .map { obj =>
               new Van(
                 obj.get(Van.TAG_ID).getAsInt,
@@ -49,13 +50,12 @@ private[services] class SyncromaticsClient
                   obj.get(Van.TAG_LOND).getAsDouble)) }
 
         requester ! VanResults(result)
+        reader.close()
       } catch {
         case NonFatal(e) =>
           Log.e(Global.APP_LOG_ID, s"$LOG_TAG | Failed to get Vans for Route.")
           Log.e(Global.APP_LOG_ID, s"$LOG_TAG | URL: $requestUrl")
           Log.e(Global.APP_LOG_ID, e.getMessage)
-      } finally {
-        reader.close()
       }
 
     case FetchArrivalTimes(stop) =>
@@ -77,7 +77,7 @@ private[services] class SyncromaticsClient
         }
       }
 
-      val results = Routes.getAll.flatMap { readArrivalTime }
+      val results = Routes.getAll.flatMap { readArrivalTime } .toList
       requester ! ArrivalTimeResults(results)
 
     case _ =>

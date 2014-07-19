@@ -1,7 +1,5 @@
 package edu.vanderbilt.vandyvans
 
-import com.marsupial.eventhub.{ChattyActivity, AppInjection}
-
 import scala.collection.JavaConversions._
 
 import android.app.Activity
@@ -12,7 +10,9 @@ import android.widget._
 
 import com.marsupial.eventhub.Helpers.EasyActivity
 import edu.vanderbilt.vandyvans.models.{Routes, ArrivalTime, Stops, Stop}
-import edu.vanderbilt.vandyvans.services.{ReminderController, Global, Clients, SyncromaticsClient}
+import edu.vanderbilt.vandyvans.services.{ReminderController, Global, Clients}
+import com.marsupial.eventhub.{ChattyActivity, AppInjection}
+import edu.vanderbilt.vandyvans.services.SyncromaticsClient._
 
 class DetailActivity extends Activity
     with EasyActivity
@@ -40,7 +40,6 @@ class DetailActivity extends Activity
 
   lazy val reminderViewController =
     new ReminderViewController(reminderSwitch, reminderText, this)
-  lazy val controller = new Handler(this)
   var stop: Stop = null
   val apiClient: Clients = app
   val reminderController: ReminderController = null
@@ -64,12 +63,12 @@ class DetailActivity extends Activity
     stop = Stops.getForId(stopId)
     Option(getActionBar).foreach { _.setTitle(stop.name) }
 
-    apiClient.syncromatics ! new SyncromaticsClient.FetchArrivalTimes(controller, stop)
+    apiClient.syncromatics ? FetchArrivalTimes(stop)
   }
 
   override def handleMessage(msg: Message) = {
     msg.obj match {
-      case x: SyncromaticsClient.ArrivalTimeResults =>
+      case x: ArrivalTimeResults =>
         displayArrivalTimes(x.times)
     }
     false
