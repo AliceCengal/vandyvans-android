@@ -1,16 +1,22 @@
 package edu.vanderbilt.vandyvans.services
 
+import edu.vanderbilt.vandyvans.R
+
+import scala.ref.WeakReference
+import scala.collection.JavaConversions._
+
 import android.app.{Notification, NotificationManager, Service}
 import android.content.{Context, Intent}
 import android.os._
 import android.util.Log
+
 import com.marsupial.eventhub.ActorConversion
 import edu.vanderbilt.vandyvans.models.{Stops, ArrivalTime}
+import SyncromaticsClient._
 
-import scala.ref.WeakReference
 
-class ReminderServices extends Service with Handler.Callback {
-  import ReminderServices._
+class ReminderService extends Service with Handler.Callback {
+  import ReminderService._
 
   lazy val workerThread = new HandlerThread("reminderThread")
   lazy val syncroHandler = new Handler(workerThread.getLooper, new SyncromaticsClient)
@@ -39,14 +45,14 @@ class ReminderServices extends Service with Handler.Callback {
   override def handleMessage(msg: Message) = {
     msg.what match {
       case SUBSCRIBE_TO_STOP =>
-        logMessage(s"Received subscription request: ${message.arg1}")
-        val tracker = new StopTracker(message.arg1, trackerHandler, syncroHandler)
+        logMessage(s"Received subscription request: ${msg.arg1}")
+        val tracker = new StopTracker(msg.arg1, trackerHandler, syncroHandler)
         Message.obtain(tracker, INIT).sendToTarget()
         trackers = trackers + tracker
 
       case UNSUBSCRIBE_TO_STOP =>
-        logMessage("Received unsubscription request: " + message.arg1)
-        trackers.find(_.id == message.arg1).foreach { tracker =>
+        logMessage(s"Received unsubscription request: ${msg.arg1}")
+        trackers.find(_.id == msg.arg1).foreach { tracker =>
           Message.obtain(tracker, STOP_TRACKING).sendToTarget()
           trackers = trackers - tracker
         }
@@ -59,10 +65,11 @@ class ReminderServices extends Service with Handler.Callback {
 
       case VAN_IS_ARRIVEN =>
         val reportingTracker = msg.obj.asInstanceOf[StopTracker]
-        trackers = tracker - reportingTracker
-        doBroadcastVanArrival(reportingTracker.latestArrivalTime)
+        trackers = trackers - reportingTracker
+        reportingTracker.latestArrivalTime.foreach { doBroadcastVanArrival }
         if (trackers.isEmpty) { stopSelf() }
     }
+    true
   }
 
   private def doBroadcastVanArrival(arrivalTime: ArrivalTime) {
@@ -92,7 +99,7 @@ class ReminderServices extends Service with Handler.Callback {
 
 }
 
-object ReminderServices {
+object ReminderService {
   val SUBSCRIBE_TO_STOP: Int = 42
   val UNSUBSCRIBE_TO_STOP: Int = 43
   val VAN_IS_ARRIVEN: Int = 44
@@ -116,9 +123,9 @@ object ReminderServices {
 
     override def handleMessage(msg: Message) {
       if (msg.what == INIT) {
-        logMessage("Initing for stopId: " + stopId)
+        logMessage(s"Initing for stopId: $id")
         isTracking = true
-        syncro ! new SyncromaticsClient.FetchArrivalTimes(this, Stops.getForId(id))
+        syncro ! new FetchArrivalTimes(this, Stops.getForId(id))
 
       } else if (msg.what == NOTIFY_PARENT) {
         if (isTracking) {
@@ -126,8 +133,8 @@ object ReminderServices {
           Message.obtain(parent, VAN_IS_ARRIVEN, this).sendToTarget()
         }
 
-      } else if (msg.obj.isInstanceOf[SyncromaticsClient.ArrivalTimeResults]) {
-        handleArrivalTimes(msg.obj.times)
+      } else if (msg.obj.isInstanceOf[ArrivalTimeResults]) {
+        handleArrivalTimes(msg.obj.asInstanceOf[ArrivalTimeResults].times)
       }
     }
 
@@ -140,11 +147,11 @@ object ReminderServices {
         for (latest <- latestArrivalTime) {
           if (latest.minutes > 5) {
             logMessage("Scheduling delayed notification")
-            logMessage(latestArrivalTime.toString)
-            sendMessageDelayed(Message.obtain(this, NOTIFY_PARENT), (latestArrivalTime.minutes - 5) * 60000)
+            logMessage(latest.toString)
+            sendMessageDelayed(Message.obtain(this, NOTIFY_PARENT), (latest.minutes - 5) * 60000)
           } else {
             logMessage("Scheduling immediate notification")
-            logMessage(latestArrivalTime.toString)
+            logMessage(latest.toString)
             Message.obtain(this, NOTIFY_PARENT).sendToTarget()
           }
         }

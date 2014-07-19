@@ -51,9 +51,9 @@ class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayou
     clients.vandyVans ! new FetchStops(bridge, route)
     clients.syncromatics ! new FetchVans(bridge, route)
 
-    Option(mMapFragment.getMap).foreach { map =>
+    Option(mapFrag.getMap).foreach { map =>
       map.clear()
-      map.animateCamera(getDefaultCameraUpdate())
+      map.animateCamera(defaultCamera)
       map.setMyLocationEnabled(true)
     }
 

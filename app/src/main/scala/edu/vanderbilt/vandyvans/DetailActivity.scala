@@ -12,7 +12,7 @@ import android.widget._
 
 import com.marsupial.eventhub.Helpers.EasyActivity
 import edu.vanderbilt.vandyvans.models.{Routes, ArrivalTime, Stops, Stop}
-import edu.vanderbilt.vandyvans.services.{Global, Clients, SyncromaticsClient}
+import edu.vanderbilt.vandyvans.services.{ReminderController, Global, Clients, SyncromaticsClient}
 
 class DetailActivity extends Activity
     with EasyActivity

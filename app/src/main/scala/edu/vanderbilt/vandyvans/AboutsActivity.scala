@@ -5,7 +5,7 @@ import android.content.{Context, Intent}
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import com.marsupial.eventhub.{ChattyActivity, AppInjection}
+import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
 import edu.vanderbilt.vandyvans.models.Report
 import edu.vanderbilt.vandyvans.services.{Global, Clients}
@@ -13,7 +13,7 @@ import edu.vanderbilt.vandyvans.services.{Global, Clients}
 class AboutsActivity extends Activity
     with EasyActivity
     with AppInjection[Global]
-    with ChattyActivity
+    with ActorConversion
 {
   val TAG_FORMTYPE = "formtype"
   val TAG_BUG = 1000
