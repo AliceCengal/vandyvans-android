@@ -24,8 +24,8 @@ class DetailActivity extends Activity
   def blueDisp  = component[TextView](R.id.tv1)
   def redRL     = component[RelativeLayout](R.id.rl2)
   def redDisp   = component[TextView](R.id.tv2)
-  def greenRL   = component[RelativeLayout](R.id.rl2)
-  def greenDisp = component[TextView](R.id.tv2)
+  def greenRL   = component[RelativeLayout](R.id.rl3)
+  def greenDisp = component[TextView](R.id.tv3)
 
   lazy val blueGroup  = new ArrivalTimeViewHolder(blueRL, blueDisp)
   lazy val redGroup   = new ArrivalTimeViewHolder(redRL, redDisp)
@@ -39,8 +39,6 @@ class DetailActivity extends Activity
   lazy val reminderViewController =
     new ReminderViewController(reminderSwitch, reminderText, this)
   var stop: Stop = null
-  val apiClient: Clients = app
-  val reminderController: ReminderController = null
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
@@ -61,7 +59,7 @@ class DetailActivity extends Activity
     stop = Stop.forId(stopId).get // fix
     Option(getActionBar).foreach { _.setTitle(stop.name) }
 
-    apiClient.syncromatics ? FetchArrivalTimes(stop)
+    app.syncromatics ? FetchArrivalTimes(stop)
   }
 
   override def handleMessage(msg: Message) = {
@@ -95,11 +93,11 @@ class DetailActivity extends Activity
 
   def getStopId = stop.id
 
-  def doSubscribe() { reminderController.subscribeReminderForStop(getStopId) }
+  def doSubscribe() { app.subscribeReminderForStop(getStopId) }
 
-  def doUnsubscribe() { reminderController.unsubscribeReminderForStop(getStopId) }
+  def doUnsubscribe() { app.unsubscribeReminderForStop(getStopId) }
 
-  def isSubscribed = reminderController.isSubscribedToStop(getStopId)
+  def isSubscribed = app.isSubscribedToStop(getStopId)
 
 }
 

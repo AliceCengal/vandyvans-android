@@ -1,21 +1,22 @@
 package edu.vanderbilt.vandyvans.services
 
+import scala.util.Try
 import android.content.{ComponentName, Intent, Context, ServiceConnection}
 import android.os._
 import android.util.Log
 
-class SimpleReminderController(val ctx: Context)
-  extends ReminderController
-  with ServiceConnection with Handler.Callback
+class SimpleReminderController(ctx: Context) extends ReminderController
+                                       with ServiceConnection
+                                       with Handler.Callback
 {
   import SimpleReminderController._
 
-  val prefs = ctx.getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
+  private val prefs = ctx.getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
 
-  var subscribedStops = Set.empty[Int]
-  var isServiceRunning = false
-  var serviceHandler = Option.empty[Messenger]
-  lazy val receiver = new Messenger(new Handler(this))
+  private var subscribedStops = Set.empty[Int]
+  private var isServiceRunning = false
+  private var serviceHandler = Option.empty[Messenger]
+  private lazy val receiver = new Messenger(new Handler(this))
 
   def start() {
     subscribedStops ++ str2Nums(prefs.getString(REMINDER_SUBSCRIPTION, ""))
@@ -110,7 +111,8 @@ object SimpleReminderController {
 
   val REMINDER_SUBSCRIPTION = "reminderSubsctiontion"
 
-  def str2Nums(str: String) = str.split(",").map(_.toInt).toSet
+  def str2Nums(str: String) =
+    str.split(",").flatMap(s => Try(s.toInt).toOption).toSet
 
   def nums2Str(nums: Set[Int]) = nums.mkString(",")
 

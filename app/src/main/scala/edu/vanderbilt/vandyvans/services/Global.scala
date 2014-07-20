@@ -10,10 +10,13 @@ import com.marsupial.eventhub.{Initialize, EventfulApp}
 import edu.vanderbilt.vandyvans.R
 import edu.vanderbilt.vandyvans.models.Route
 
-class Global extends android.app.Application with EventfulApp with Clients {
-
-  lazy val reminders = new SimpleReminderController(this)
-  lazy val serviceThread = new HandlerThread("BackgroundThread")
+class Global extends android.app.Application
+                     with EventfulApp
+                     with Clients
+                     with ReminderController
+{
+  private lazy val reminders = new SimpleReminderController(this)
+  private lazy val serviceThread = new HandlerThread("BackgroundThread")
 
   lazy val vandyVans = new Handler(serviceThread.getLooper, new VandyVansClient)
   lazy val syncromatics = new Handler(serviceThread.getLooper, new SyncromaticsClient)
@@ -35,8 +38,16 @@ class Global extends android.app.Application with EventfulApp with Clients {
     Parse.initialize(this,
       "6XOkxBODp8HZANJaxFhEfSFPZ8H93Pt9531Htt1X",
       "61wOewMMN0YISmX3UM79PGssnTsz1NfkOOMOsHMm")
-
   }
+
+  def subscribeReminderForStop(stopdId: Int): Unit =
+    reminders.subscribeReminderForStop(stopdId)
+
+  def unsubscribeReminderForStop(stopId: Int): Unit =
+    reminders.unsubscribeReminderForStop(stopId)
+
+  def isSubscribedToStop(stopId: Int): Boolean =
+    reminders.isSubscribedToStop(stopId)
 
 }
 
