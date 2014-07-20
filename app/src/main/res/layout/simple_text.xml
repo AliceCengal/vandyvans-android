@@ -2,8 +2,8 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:textSize="24sp"
-    android:padding="8dp"
-    android:gravity="center_vertical"
     android:background="@drawable/white_to_darkgold"
-    android:text="Hello" />
+    android:gravity="center_vertical"
+    android:padding="8dp"
+    android:text="Hello"
+    android:textSize="24sp" />
