@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.models
+package com.vandyapps.vandyvans.models
 
 case class Van(id: Int, percentFull: Int, location: FloatPair)
 

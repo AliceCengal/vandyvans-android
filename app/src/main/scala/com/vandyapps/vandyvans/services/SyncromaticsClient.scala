@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.services
+package com.vandyapps.vandyvans.services
 
 import java.io.InputStreamReader
 import scala.collection.JavaConversions._
@@ -9,7 +9,7 @@ import android.util.Log
 import com.google.gson.JsonParser
 
 import com.marsupial.eventhub.{Server, Initialize}
-import edu.vanderbilt.vandyvans.models._
+import com.vandyapps.vandyvans.models._
 
 object SyncromaticsClient {
 

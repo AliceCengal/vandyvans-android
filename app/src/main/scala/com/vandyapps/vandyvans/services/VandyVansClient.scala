@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.services
+package com.vandyapps.vandyvans.services
 
 import scala.collection.JavaConversions._
 import scala.util.control.NonFatal
@@ -11,7 +11,7 @@ import com.google.gson.{JsonObject, JsonElement, JsonParser}
 import com.parse.ParseObject
 
 import com.marsupial.eventhub.{Initialize, Server}
-import edu.vanderbilt.vandyvans.models._
+import com.vandyapps.vandyvans.models._
 
 object VandyVansClient {
 

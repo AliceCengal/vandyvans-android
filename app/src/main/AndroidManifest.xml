@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="edu.vanderbilt.vandyvans">
+    package="com.vandyapps.vandyvans">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -18,7 +18,7 @@
         android:required="true" />
 
     <application
-        android:name="edu.vanderbilt.vandyvans.services.Global"
+        android:name="com.vandyapps.vandyvans.services.Global"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
@@ -34,20 +34,20 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="edu.vanderbilt.vandyvans.DetailActivity"
+            android:name=".DetailActivity"
             android:screenOrientation="portrait"></activity>
         <activity
-            android:name="edu.vanderbilt.vandyvans.AboutsActivity"
+            android:name=".AboutsActivity"
             android:screenOrientation="portrait"></activity>
         <activity
-            android:name="edu.vanderbilt.vandyvans.FormActivity"
+            android:name=".FormActivity"
             android:screenOrientation="portrait"></activity>
         <activity
-            android:name="edu.vanderbilt.vandyvans.CodeAccessActivity"
+            android:name=".CodeAccessActivity"
             android:screenOrientation="portrait"></activity>
 
         <service
-            android:name="edu.vanderbilt.vandyvans.services.ReminderService"
+            android:name=".services.ReminderService"
             android:exported="false"></service>
 
         <meta-data

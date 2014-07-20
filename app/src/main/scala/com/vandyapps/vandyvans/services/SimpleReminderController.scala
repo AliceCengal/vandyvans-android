@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.services
+package com.vandyapps.vandyvans.services
 
 import scala.util.Try
 import android.content.{ComponentName, Intent, Context, ServiceConnection}

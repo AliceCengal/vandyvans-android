@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans
+package com.vandyapps.vandyvans
 
 import android.support.v4.app.Fragment
 import android.os.Bundle
@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.{ListView, AdapterView}
 
 import com.marsupial.eventhub.Helpers
-import edu.vanderbilt.vandyvans.models.Stop
+import com.vandyapps.vandyvans.models.Stop
 
 class StopsFragment extends Fragment
                     with AdapterView.OnItemClickListener

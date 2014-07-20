@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans
+package com.vandyapps.vandyvans
 
 import android.app.Activity
 import android.content.{Context, Intent}
@@ -8,8 +8,8 @@ import android.widget.Button
 
 import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
-import edu.vanderbilt.vandyvans.models.Report
-import edu.vanderbilt.vandyvans.services.{Global, Clients}
+import com.vandyapps.vandyvans.models.Report
+import com.vandyapps.vandyvans.services.{Global, Clients}
 
 class AboutsActivity extends Activity
     with EasyActivity

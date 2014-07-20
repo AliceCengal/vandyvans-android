@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.services
+package com.vandyapps.vandyvans.services
 
 trait ReminderController {
   def subscribeReminderForStop(stopdId: Int): Unit

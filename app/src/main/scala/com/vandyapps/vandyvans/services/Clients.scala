@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.services
+package com.vandyapps.vandyvans.services
 
 import android.os.Handler
 

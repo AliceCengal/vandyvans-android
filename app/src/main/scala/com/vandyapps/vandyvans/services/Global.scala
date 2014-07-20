@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.services
+package com.vandyapps.vandyvans.services
 
 import java.io.OutputStreamWriter
 import java.net.URL
@@ -7,8 +7,8 @@ import android.os.{Handler, HandlerThread}
 import com.parse.Parse
 
 import com.marsupial.eventhub.{Initialize, EventfulApp}
-import edu.vanderbilt.vandyvans.R
-import edu.vanderbilt.vandyvans.models.Route
+import com.vandyapps.vandyvans.R
+import com.vandyapps.vandyvans.models.Route
 
 class Global extends android.app.Application
                      with EventfulApp

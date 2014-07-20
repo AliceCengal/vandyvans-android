@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans
+package com.vandyapps.vandyvans
 
 import android.app.Activity
 import android.os.Bundle

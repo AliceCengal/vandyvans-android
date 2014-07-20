@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans
+package com.vandyapps.vandyvans
 
 import java.util.Locale
 
@@ -13,7 +13,7 @@ import com.google.android.gms.maps.{GoogleMapOptions, SupportMapFragment}
 
 import com.marsupial.eventhub.AppInjection
 import com.marsupial.eventhub.Helpers.EasyActivity
-import edu.vanderbilt.vandyvans.services.Global
+import com.vandyapps.vandyvans.services.Global
 
 class StopActivity extends FragmentActivity
     with ActionBar.TabListener with EasyActivity with AppInjection[Global]

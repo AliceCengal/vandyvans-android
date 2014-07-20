@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.models
+package com.vandyapps.vandyvans.models
 
 case class Route(id: Int, name: String)
 

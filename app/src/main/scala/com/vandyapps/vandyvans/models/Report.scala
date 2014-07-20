@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans.models
+package com.vandyapps.vandyvans.models
 
 case class Report(isBugReport: Boolean,
                   senderAddress: String,

@@ -1,6 +1,6 @@
-package edu.vanderbilt.vandyvans.services
+package com.vandyapps.vandyvans.services
 
-import edu.vanderbilt.vandyvans.R
+import com.vandyapps.vandyvans.R
 
 import scala.ref.WeakReference
 
@@ -10,7 +10,7 @@ import android.os._
 import android.util.Log
 
 import com.marsupial.eventhub.ActorConversion
-import edu.vanderbilt.vandyvans.models.{Stop, ArrivalTime}
+import com.vandyapps.vandyvans.models.{Stop, ArrivalTime}
 import SyncromaticsClient._
 
 

@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans
+package com.vandyapps.vandyvans
 
 import com.marsupial.eventhub.ActorConversion
 
@@ -9,8 +9,8 @@ import android.widget.{Button, LinearLayout}
 import com.google.android.gms.maps.model.{PolylineOptions, BitmapDescriptorFactory, MarkerOptions, LatLng}
 import com.google.android.gms.maps.{CameraUpdateFactory, SupportMapFragment}
 
-import edu.vanderbilt.vandyvans.models.Route
-import edu.vanderbilt.vandyvans.services.{SyncromaticsClient, VandyVansClient, Global, Clients}
+import com.vandyapps.vandyvans.models.Route
+import com.vandyapps.vandyvans.services.{SyncromaticsClient, VandyVansClient, Global, Clients}
 
 class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayout,
                     val blueBtn: Button, val redBtn: Button, val greenBtn: Button,

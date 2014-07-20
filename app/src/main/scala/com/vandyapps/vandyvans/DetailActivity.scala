@@ -1,4 +1,4 @@
-package edu.vanderbilt.vandyvans
+package com.vandyapps.vandyvans
 
 import android.app.Activity
 import android.content.{Intent, Context}
@@ -7,10 +7,10 @@ import android.view.View
 import android.widget._
 
 import com.marsupial.eventhub.Helpers.EasyActivity
-import edu.vanderbilt.vandyvans.models.{Route, ArrivalTime, Stop}
-import edu.vanderbilt.vandyvans.services.{ReminderController, Global, Clients}
+import com.vandyapps.vandyvans.models.{Route, ArrivalTime, Stop}
+import com.vandyapps.vandyvans.services.{ReminderController, Global, Clients}
 import com.marsupial.eventhub.{ChattyActivity, AppInjection}
-import edu.vanderbilt.vandyvans.services.SyncromaticsClient._
+import com.vandyapps.vandyvans.services.SyncromaticsClient._
 
 class DetailActivity extends Activity
     with EasyActivity
