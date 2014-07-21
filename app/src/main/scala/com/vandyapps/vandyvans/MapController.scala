@@ -1,18 +1,17 @@
 package com.vandyapps.vandyvans
 
-import com.marsupial.eventhub.ActorConversion
-
 import android.os.{Message, Handler}
 import android.view.View
 import android.widget.{Button, LinearLayout}
 
 import com.google.android.gms.maps.model.{PolylineOptions, BitmapDescriptorFactory, MarkerOptions, LatLng}
-import com.google.android.gms.maps.{CameraUpdateFactory, SupportMapFragment}
+import com.google.android.gms.maps.{CameraUpdateFactory, MapFragment}
 
+import com.marsupial.eventhub.ActorConversion
 import com.vandyapps.vandyvans.models.Route
 import com.vandyapps.vandyvans.services.{SyncromaticsClient, VandyVansClient, Global, Clients}
 
-class MapController(val mapFrag: SupportMapFragment, val overlayBar: LinearLayout,
+class MapController(val mapFrag: MapFragment, val overlayBar: LinearLayout,
                     val blueBtn: Button, val redBtn: Button, val greenBtn: Button,
                     val clients: Clients, val global: Global)
   extends Handler.Callback with View.OnClickListener with ActorConversion
@@ -113,3 +112,17 @@ object MapController {
   val LOG_ID = "MapController"
 
 }
+/*
+class MapViewController extends ViewController with HandlerResponse {
+  handle {
+    _ =>
+  }
+
+  override def handler: Handler = ???
+
+  override def view: View = ???
+
+
+}
+*/
+

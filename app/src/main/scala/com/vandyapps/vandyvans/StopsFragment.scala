@@ -1,6 +1,6 @@
 package com.vandyapps.vandyvans
 
-import android.support.v4.app.Fragment
+import android.app.Fragment
 import android.os.Bundle
 import android.view.View
 import android.widget.{ListView, AdapterView}
@@ -10,7 +10,7 @@ import com.vandyapps.vandyvans.models.Stop
 
 class StopsFragment extends Fragment
                     with AdapterView.OnItemClickListener
-                    with Helpers.EasySupportFragment
+                    with Helpers.EasyFragment
 {
   override def layoutId = R.layout.fragment_stop
 

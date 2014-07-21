@@ -2,26 +2,25 @@ package com.vandyapps.vandyvans
 
 import java.util.Locale
 
-import android.app.{FragmentTransaction, ActionBar}
+import android.app._
 import android.os.Bundle
-import android.support.v4.app.{Fragment, FragmentManager, FragmentPagerAdapter, FragmentActivity}
 import android.support.v4.view.ViewPager
 import android.view.{KeyEvent, MenuItem, Menu}
 import android.widget.{Button, LinearLayout}
 import com.google.android.gms.maps.model.{LatLng, CameraPosition}
-import com.google.android.gms.maps.{GoogleMapOptions, SupportMapFragment}
+import com.google.android.gms.maps.{MapFragment, GoogleMapOptions}
 
 import com.marsupial.eventhub.AppInjection
 import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.services.Global
 
-class StopActivity extends FragmentActivity
+class StopActivity extends Activity
     with ActionBar.TabListener with EasyActivity with AppInjection[Global]
 {
   lazy val stopFragment = new StopsFragment
-  lazy val pagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager)
+  lazy val pagerAdapter = new SectionsPagerAdapter(this.getFragmentManager)
 
-  var mapFrag: SupportMapFragment = null
+  var mapFrag: MapFragment = null
   var mapController: MapController = null
 
   def bar = component[LinearLayout](R.id.linear1)
@@ -36,7 +35,7 @@ class StopActivity extends FragmentActivity
 
     Option(getActionBar).foreach { _.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS) }
 
-    mapFrag = SupportMapFragment.newInstance(
+    mapFrag = MapFragment.newInstance(
       new GoogleMapOptions()
         .zoomControlsEnabled(false)
         .camera(CameraPosition.fromLatLngZoom(
@@ -95,6 +94,7 @@ class StopActivity extends FragmentActivity
   override def onTabReselected(a: ActionBar.Tab, b: FragmentTransaction) {}
 
   class SectionsPagerAdapter(fm: FragmentManager) extends FragmentPagerAdapter(fm) {
+
     override def getItem(position: Int): Fragment = {
       position match {
         case 0 => stopFragment
