@@ -13,7 +13,7 @@
     <!--
     This is a hack.
     http://stackoverflow.com/a/13910364
-    -->
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -55,5 +55,5 @@
             android:layout_weight="33"
             android:text="@string/route_green" />
     </LinearLayout>
-
+-->
 </RelativeLayout>

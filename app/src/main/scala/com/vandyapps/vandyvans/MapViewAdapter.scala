@@ -6,7 +6,7 @@ import com.google.android.gms.maps.MapView
 
 trait MapViewAdapter extends Activity {
 
-  val mapViews: Iterable[MapView]
+  def mapViews: Iterable[MapView]
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
@@ -43,16 +43,15 @@ trait MapViewAdapter extends Activity {
 
 trait MapViewFragmentAdapter extends Fragment {
 
-  val mapViews: Iterable[MapView]
-
-  override def onCreate(saved: Bundle) {
-    super.onCreate(saved)
-    mapViews.foreach { _.onCreate(saved) }
-  }
+  def mapViews: Iterable[MapView]
 
   override def onResume() {
     super.onResume()
-    mapViews.foreach { _.onResume() }
+    mapViews.foreach { mv =>
+      // The view hierarchy of a Fragment is not created until Fragment::onCreateView
+      mv.onCreate(new Bundle)
+      mv.onResume()
+    }
   }
 
   override def onPause() {

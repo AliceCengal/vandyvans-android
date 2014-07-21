@@ -6,9 +6,6 @@ import android.app._
 import android.os.Bundle
 import android.support.v4.view.ViewPager
 import android.view.{KeyEvent, MenuItem, Menu}
-import android.widget.{Button, LinearLayout}
-import com.google.android.gms.maps.model.{LatLng, CameraPosition}
-import com.google.android.gms.maps.{MapFragment, GoogleMapOptions}
 
 import com.marsupial.eventhub.AppInjection
 import com.marsupial.eventhub.Helpers.EasyActivity
@@ -18,40 +15,18 @@ class StopActivity extends Activity
     with ActionBar.TabListener with EasyActivity with AppInjection[Global]
 {
   lazy val stopFragment = new StopsFragment
+  lazy val mapFrag      = new StopsMap
   lazy val pagerAdapter = new SectionsPagerAdapter(this.getFragmentManager)
 
-  var mapFrag: MapFragment = null
-  var mapController: MapController = null
-
-  def bar = component[LinearLayout](R.id.linear1)
-  def blueButton = component[Button](R.id.btn_blue)
-  def redButton = component[Button](R.id.btn_red)
-  def greenButton = component[Button](R.id.btn_green)
   def viewPager = component[ViewPager](R.id.pager)
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
     setContentView(R.layout.activity_stop)
-
     Option(getActionBar).foreach { _.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS) }
 
-    mapFrag = MapFragment.newInstance(
-      new GoogleMapOptions()
-        .zoomControlsEnabled(false)
-        .camera(CameraPosition.fromLatLngZoom(
-          new LatLng(Global.DEFAULT_LATITUDE, Global.DEFAULT_LONGITUDE),
-          MapController.DEFAULT_ZOOM)))
-
-    mapController = new MapController(mapFrag, bar,
-                                      blueButton, redButton, greenButton,
-                                      app, app)
-
     viewPager.setAdapter(pagerAdapter)
-    viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
-      override def onPageSelected(position: Int) {
-        Option(getActionBar).foreach { _.setSelectedNavigationItem(position) }
-      }
-    })
+    viewPager.setOnPageChangeListener(PageChangeListener)
 
     for (action <- Option(getActionBar);
          i <- 0 until pagerAdapter.getCount) {
@@ -80,18 +55,18 @@ class StopActivity extends Activity
   }
 
   override def onTabSelected(tab: ActionBar.Tab, ft: FragmentTransaction) {
-    tab.getPosition match {
-      case 0 => mapController.hideOverlay()
-      case 1 =>
-        mapController.showOverlay()
-        mapController.mapIsShown()
-    }
     viewPager.setCurrentItem(tab.getPosition)
   }
 
   override def onTabUnselected(a: ActionBar.Tab, b: FragmentTransaction) {}
 
   override def onTabReselected(a: ActionBar.Tab, b: FragmentTransaction) {}
+
+  object PageChangeListener extends ViewPager.SimpleOnPageChangeListener {
+    override def onPageSelected(position: Int) {
+      Option(getActionBar).foreach { _.setSelectedNavigationItem(position) }
+    }
+  }
 
   class SectionsPagerAdapter(fm: FragmentManager) extends FragmentPagerAdapter(fm) {
 
