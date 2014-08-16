@@ -70,6 +70,8 @@ object Helpers {
       ft.commit()
     }
 
+    def inflate(layout: Int) = getLayoutInflater.inflate(layout, null)
+
   }
 
   trait ListenerConversion {
