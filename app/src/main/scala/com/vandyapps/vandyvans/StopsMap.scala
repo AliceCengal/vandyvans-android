@@ -49,7 +49,6 @@ class StopsMap extends Fragment
 
   override def onResume() {
     super.onResume()
-    Option(mapView.getMap).foreach { _. }
   }
 
   override def handleMessage(msg: Message) = {

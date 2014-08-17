@@ -24,7 +24,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".StopActivity"
+            android:name=".TestHarzoo"
             android:label="@string/app_name"
             android:screenOrientation="portrait">
             <intent-filter>

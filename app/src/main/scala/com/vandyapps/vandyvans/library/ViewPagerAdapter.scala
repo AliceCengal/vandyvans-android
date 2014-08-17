@@ -20,9 +20,9 @@ abstract class ViewPagerAdapter extends PagerAdapter {
    *
    * @return A View corresponding to the data at the specified position.
    */
-  abstract def getView(position: Int, pager: ViewPager): View
+  def getView(position: Int, pager: ViewPager): View
 
-  abstract def getPageTitle(position: Int): CharSequence
+  def getPageTitle(position: Int): CharSequence
 
   /**
    * Determines whether a page View is associated with a specific key object as

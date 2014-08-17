@@ -1,26 +1,43 @@
 package com.vandyapps.vandyvans
 
+import android.app.Activity
 import android.os.{Message, Handler}
 import android.view.View
+import android.view.View.OnClickListener
 import android.widget.{Button, LinearLayout}
 
 import com.google.android.gms.maps.model.{PolylineOptions, BitmapDescriptorFactory, MarkerOptions, LatLng}
-import com.google.android.gms.maps.{CameraUpdateFactory, MapFragment}
+import com.google.android.gms.maps.{MapView, CameraUpdateFactory}
 
-import com.marsupial.eventhub.ActorConversion
+import com.marsupial.eventhub.{AppInjection, ActorConversion}
 import com.vandyapps.vandyvans.models.Route
-import com.vandyapps.vandyvans.services.{SyncromaticsClient, VandyVansClient, Global, Clients}
+import com.vandyapps.vandyvans.services.{SyncromaticsClient, VandyVansClient, Global}
 
-class MapController(val mapFrag: MapFragment, val overlayBar: LinearLayout,
-                    val blueBtn: Button, val redBtn: Button, val greenBtn: Button,
-                    val clients: Clients, val global: Global)
-  extends Handler.Callback with View.OnClickListener with ActorConversion
-{
+trait MapController extends ActorConversion {
+  self: Activity with AppInjection[Global] =>
+
   import MapController._
   import VandyVansClient._
   import SyncromaticsClient._
 
-  implicit lazy val bridge = new Handler(this)
+  def mapview: MapView
+  def overlayBar: LinearLayout
+  def blueBtn: Button
+  def redBtn: Button
+  def greenBtn: Button
+
+  implicit lazy val bridge: Handler = new Handler() {
+    override def handleMessage(msg: Message): Unit = msg.obj match {
+      case m: WaypointResults => handleWaypointResult(m)
+      case m: StopResults => handleStopResults(m)
+      case m: VanResults => handleVanResults(m)
+      case "Init" =>
+        blueBtn.onClick { _ => routeSelected(Route.BLUE) }
+        redBtn.onClick { _ => routeSelected(Route.RED) }
+        greenBtn.onClick { _ => routeSelected(Route.GREEN) }
+    }
+  }
+
   var currentRoute = Route.BLUE
 
   lazy val defaultCamera =
@@ -28,41 +45,22 @@ class MapController(val mapFrag: MapFragment, val overlayBar: LinearLayout,
       new LatLng(Global.DEFAULT_LATITUDE, Global.DEFAULT_LONGITUDE),
       DEFAULT_ZOOM)
 
-  List(blueBtn, redBtn, greenBtn).foreach { _.setOnClickListener(this) }
-
-  override def handleMessage(msg: Message) = {
-    msg.obj match {
-      case m: WaypointResults => handleWaypointResult(m)
-      case m: StopResults => handleStopResults(m)
-      case m: VanResults => handleVanResults(m)
-    }
-    true
-  }
+  bridge ! "Init"
 
   def routeSelected(route: Route) {
-    currentRoute = route
-    overlayBar.setBackgroundColor(global.getColorFor(currentRoute))
+    if (currentRoute != route) {
+      currentRoute = route
+      overlayBar.setBackgroundColor(app.getColorFor(currentRoute))
 
-    // Requesting data from the services.
-    clients.vandyVans ? FetchWaypoints(route)
-    clients.vandyVans ? FetchStops(route)
-    clients.syncromatics ? FetchVans(route)
+      // Requesting data from the services.
+      app.vandyVans ? FetchWaypoints(route)
+      app.vandyVans ? FetchStops(route)
+      app.syncromatics ? FetchVans(route)
 
-    Option(mapFrag.getMap).foreach { map =>
-      map.clear()
-      map.animateCamera(defaultCamera)
-      map.setMyLocationEnabled(true)
+      Option(mapview.getMap).foreach { map =>
+        map.clear()
+      }
     }
-
-  }
-
-  override def onClick(view: View) {
-    val select = view match {
-      case blueButton if currentRoute != Route.BLUE => Route.BLUE
-      case redButton if currentRoute != Route.RED => Route.RED
-      case greenButton if currentRoute != Route.GREEN => Route.GREEN
-    }
-    routeSelected(select)
   }
 
   def showOverlay(): Unit = overlayBar.setVisibility(View.VISIBLE)
@@ -72,16 +70,16 @@ class MapController(val mapFrag: MapFragment, val overlayBar: LinearLayout,
   def mapIsShown(): Unit = routeSelected(currentRoute)
 
   def handleWaypointResult(results: WaypointResults) {
-    for (map <- Option(mapFrag.getMap);
+    for (map <- Option(mapview.getMap);
          way <- results.waypoints) {
       map.addPolyline(new PolylineOptions()
-        .color(global.getColorFor(currentRoute))
+        .color(app.getColorFor(currentRoute))
         .width(DEFAULT_WIDTH))
     }
   }
 
   def handleStopResults(results: StopResults) {
-    for (map <- Option(mapFrag.getMap);
+    for (map <- Option(mapview.getMap);
          stop <- results.stops) {
       map.addMarker(new MarkerOptions()
         .position(new LatLng(stop.latitude, stop.longitude))
@@ -91,7 +89,7 @@ class MapController(val mapFrag: MapFragment, val overlayBar: LinearLayout,
   }
 
   def handleVanResults(results: VanResults) {
-    for (map <- Option(mapFrag.getMap);
+    for (map <- Option(mapview.getMap);
          van <- results.vans) {
       map.addMarker(new MarkerOptions()
         .position(new LatLng(van.location.lat, van.location.lon))
@@ -112,17 +110,3 @@ object MapController {
   val LOG_ID = "MapController"
 
 }
-/*
-class MapViewController extends ViewController with HandlerResponse {
-  handle {
-    _ =>
-  }
-
-  override def handler: Handler = ???
-
-  override def view: View = ???
-
-
-}
-*/
-
