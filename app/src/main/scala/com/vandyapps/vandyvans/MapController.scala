@@ -2,8 +2,8 @@ package com.vandyapps.vandyvans
 
 import android.app.Activity
 import android.os.{Message, Handler}
+import android.util.Log
 import android.view.View
-import android.view.View.OnClickListener
 import android.widget.{Button, LinearLayout}
 
 import com.google.android.gms.maps.model.{PolylineOptions, BitmapDescriptorFactory, MarkerOptions, LatLng}
@@ -28,7 +28,10 @@ trait MapController extends ActorConversion {
 
   implicit lazy val bridge: Handler = new Handler() {
     override def handleMessage(msg: Message): Unit = msg.obj match {
-      case m: WaypointResults => handleWaypointResult(m)
+      case m: WaypointResults =>
+        Log.i(Global.APP_LOG_ID, s"$LOG_ID | Received Waypoints")
+        Log.i(Global.APP_LOG_ID, s"$LOG_ID | ${m.waypoints}")
+        handleWaypointResult(m)
       case m: StopResults => handleStopResults(m)
       case m: VanResults => handleVanResults(m)
       case "Init" =>
@@ -70,12 +73,14 @@ trait MapController extends ActorConversion {
   def mapIsShown(): Unit = routeSelected(currentRoute)
 
   def handleWaypointResult(results: WaypointResults) {
-    for (map <- Option(mapview.getMap);
-         way <- results.waypoints) {
-      map.addPolyline(new PolylineOptions()
-        .color(app.getColorFor(currentRoute))
-        .width(DEFAULT_WIDTH))
+    val options = new PolylineOptions()
+      .color(app.getColorFor(currentRoute))
+      .width(DEFAULT_WIDTH)
+    for (way <- results.waypoints) {
+      options.add(new LatLng(way.lat, way.lon))
     }
+    mapview.getMap.addPolyline(options)
+    Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Waypoints")
   }
 
   def handleStopResults(results: StopResults) {
@@ -86,6 +91,7 @@ trait MapController extends ActorConversion {
         .title(stop.name)
         .draggable(false))
     }
+    Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Stops")
   }
 
   def handleVanResults(results: VanResults) {

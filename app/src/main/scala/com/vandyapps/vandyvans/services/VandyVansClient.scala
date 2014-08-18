@@ -41,7 +41,10 @@ object VandyVansClient {
 
     def buildFromJson(jsonObj: JsonObject): Stop =
       Stop(id = jsonObj.get(Stop.TAG_ID).getAsInt,
-           name = jsonObj.get(Stop.TAG_NAME).getAsString)
+           name = jsonObj.get(Stop.TAG_NAME).getAsString,
+           image = jsonObj.get(Stop.TAG_IMAGE).getAsString,
+           latitude = jsonObj.get(Stop.TAG_LAT).getAsDouble,
+           longitude = jsonObj.get(Stop.TAG_LON).getAsDouble)
 
     json match {
       case j if j.isJsonArray =>
@@ -57,7 +60,7 @@ object VandyVansClient {
   }
 
   def extractWaypoints(json: JsonElement): List[FloatPair] = {
-    json.getAsJsonArray
+    json.getAsJsonArray.get(0).getAsJsonArray
       .map { _.getAsJsonObject }
       .map { obj =>
         new FloatPair(
@@ -83,10 +86,12 @@ private[services] class VandyVansClient extends Handler.Callback with Server {
 
       def doHttpFetch() {
         val requestUrl = s"$BASE_URL/Route/${route.id}/Direction/0/Stops"
+        Log.i(Global.APP_LOG_ID, s"$LOG_TAG | Getting Stops with $requestUrl")
         try {
           val raw = Source.fromInputStream(Global.get(requestUrl)).mkString
           val result = extractStop(PARSER.parse(raw))
-
+          Log.i(Global.APP_LOG_ID, s"$LOG_TAG | Received Stops")
+          Log.i(Global.APP_LOG_ID, s"$LOG_TAG | $result")
           requester ! StopResults(result)
           storeCacheRawDataUpdateDate(cacheId, raw, dateCacheId)
         } catch {
@@ -97,7 +102,7 @@ private[services] class VandyVansClient extends Handler.Callback with Server {
         }
       }
 
-      if (prefs.contains(cacheId)) {
+      if (prefs.contains(cacheId) && false) {
         if (!isCacheExpired(dateCacheId)) {
           val result = extractStop(PARSER.parse(prefs.getString(cacheId, "")))
           if (result.isEmpty) {
@@ -119,24 +124,32 @@ private[services] class VandyVansClient extends Handler.Callback with Server {
       val dateCacheId = ROUTE_CACHE_DATE + route.id
 
       def doHttpFetch() {
-        val requestUrl = s"$BASE_URL/Route/${route.id}/Waypoints"
+        val requestUrl = s"$BASE_URL/Route/${route.waypointId}/Waypoints"
+        Log.i(Global.APP_LOG_ID, s"$LOG_TAG | Getting Waypoints with $requestUrl")
         try {
           val raw = Source.fromInputStream(Global.get(requestUrl)).mkString
           val result = extractWaypoints(PARSER.parse(raw))
-
+          if (result.isEmpty) {
+            Log.e(Global.APP_LOG_ID, LOG_TAG + " | Failed to get Waypoints for Route.")
+            Log.e(Global.APP_LOG_ID, LOG_TAG + " | URL: " + requestUrl)
+            Log.e(Global.APP_LOG_ID, s"$LOG_TAG | $raw")
+          } else {
+            Log.i(Global.APP_LOG_ID, s"$LOG_TAG | Received Waypoints")
+            Log.i(Global.APP_LOG_ID, s"$LOG_TAG | $result")
+          }
           requester ! WaypointResults(result)
           storeCacheRawDataUpdateDate(cacheId, raw, dateCacheId)
         } catch {
           case NonFatal(e) =>
-            Log.e(Global.APP_LOG_ID, LOG_TAG + " | Failed to get Stops for Route.")
+            Log.e(Global.APP_LOG_ID, LOG_TAG + " | Failed to get Waypoints for Route.")
             Log.e(Global.APP_LOG_ID, LOG_TAG + " | URL: " + requestUrl)
             Log.e(Global.APP_LOG_ID, e.getMessage)
         }
       }
 
-      if (prefs.contains(cacheId)) {
+      if (prefs.contains(cacheId) && false) {
         if (!isCacheExpired(dateCacheId)) {
-          val result = extractStop(PARSER.parse(prefs.getString(cacheId, "")))
+          val result = extractWaypoints(PARSER.parse(prefs.getString(cacheId, "")))
           if (result.isEmpty) {
             invalidateCache(cacheId)
             doHttpFetch()

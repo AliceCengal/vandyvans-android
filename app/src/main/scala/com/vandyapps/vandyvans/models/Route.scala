@@ -1,13 +1,13 @@
 package com.vandyapps.vandyvans.models
 
-case class Route(id: Int, name: String)
+case class Route(id: Int, name: String, waypointId: Int)
 
 object Route {
-  val BLUE  = Route(745, "Blue")
-  val RED   = Route(746, "Red")
-  val GREEN = Route(749, "Green")
+  val BLUE  = Route(1857, "Black", 1290) // Blue 745
+  val RED   = Route(1856, "Red", 1291)   // 746
+  val GREEN = Route(1858, "Gold", 1289)  // Green 749
 
   def getAll = List(BLUE, RED, GREEN)
 
-  def getForId(id: Int) = getAll.find(_.id == id).get
+  def getForId(id: Int) = getAll.find(_.id == id).getOrElse(BLUE)
 }

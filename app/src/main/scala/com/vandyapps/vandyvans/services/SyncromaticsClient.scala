@@ -33,7 +33,7 @@ private[services] class SyncromaticsClient
   override def handleRequest(msg: AnyRef) = msg match {
     case Initialize(ctx) =>
     case FetchVans(route) =>
-      val requestUrl = s"$BASE_URL/Route/${route.id}/Vehicles$API_KEY"
+      val requestUrl = s"$BASE_URL/Route/${route.waypointId}/Vehicles$API_KEY"
 
       try {
         val reader = new InputStreamReader(Global.get(requestUrl))
@@ -73,7 +73,9 @@ private[services] class SyncromaticsClient
           reader.close()
           Some(new ArrivalTime(stop, route, predictionObj.get("Minutes").getAsInt))
         } catch {
-          case NonFatal(e) => None
+          case NonFatal(e) =>
+            Log.e(Global.APP_LOG_ID, s"$LOG_TAG | Failed to get ArrivalTime for Route $route.")
+            None
         }
       }
 
