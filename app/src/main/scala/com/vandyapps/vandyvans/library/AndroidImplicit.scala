@@ -10,9 +10,9 @@ trait AndroidImplicit {
     def component[T <: View](id: Int) =
       v.findViewById(id).asInstanceOf[T]
 
-    def onClick(handler: View=>Unit) {
+    def onClick(handler: =>Unit) {
       v.setOnClickListener(new OnClickListener {
-        override def onClick(v: View): Unit = handler(v)
+        override def onClick(v: View): Unit = { handler }
       })
     }
   }

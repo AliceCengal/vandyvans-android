@@ -10,7 +10,7 @@ import com.google.android.gms.maps.model.{PolylineOptions, BitmapDescriptorFacto
 import com.google.android.gms.maps.{MapView, CameraUpdateFactory}
 
 import com.marsupial.eventhub.{AppInjection, ActorConversion}
-import com.vandyapps.vandyvans.models.Route
+import com.vandyapps.vandyvans.models.{Van, FloatPair, Stop, Route}
 import com.vandyapps.vandyvans.services.{SyncromaticsClient, VandyVansClient, Global}
 
 trait MapController extends ActorConversion {
@@ -20,6 +20,8 @@ trait MapController extends ActorConversion {
   import VandyVansClient._
   import SyncromaticsClient._
 
+  var currentRoute = Route.BLUE
+
   def mapview: MapView
   def overlayBar: LinearLayout
   def blueBtn: Button
@@ -28,20 +30,19 @@ trait MapController extends ActorConversion {
 
   implicit lazy val bridge: Handler = new Handler() {
     override def handleMessage(msg: Message): Unit = msg.obj match {
-      case m: WaypointResults =>
+      case WaypointResults(waypoints) =>
         Log.i(Global.APP_LOG_ID, s"$LOG_ID | Received Waypoints")
-        Log.i(Global.APP_LOG_ID, s"$LOG_ID | ${m.waypoints}")
-        handleWaypointResult(m)
-      case m: StopResults => handleStopResults(m)
-      case m: VanResults => handleVanResults(m)
+        Log.i(Global.APP_LOG_ID, s"$LOG_ID | $waypoints")
+        handleWaypointResult(waypoints)
+      case StopResults(stops) => handleStopResults(stops)
+      case VanResults(vans) => handleVanResults(vans)
       case "Init" =>
-        blueBtn.onClick { _ => routeSelected(Route.BLUE) }
-        redBtn.onClick { _ => routeSelected(Route.RED) }
-        greenBtn.onClick { _ => routeSelected(Route.GREEN) }
+        blueBtn.onClick(routeSelected(Route.BLUE))
+        redBtn.onClick(routeSelected(Route.RED))
+        greenBtn.onClick(routeSelected(Route.GREEN))
+      case _ =>
     }
   }
-
-  var currentRoute = Route.BLUE
 
   lazy val defaultCamera =
     CameraUpdateFactory.newLatLngZoom(
@@ -72,20 +73,20 @@ trait MapController extends ActorConversion {
 
   def mapIsShown(): Unit = routeSelected(currentRoute)
 
-  def handleWaypointResult(results: WaypointResults) {
+  def handleWaypointResult(waypoints: Seq[FloatPair]) {
     val options = new PolylineOptions()
       .color(app.getColorFor(currentRoute))
       .width(DEFAULT_WIDTH)
-    for (way <- results.waypoints) {
+    for (way <- waypoints) {
       options.add(new LatLng(way.lat, way.lon))
     }
     mapview.getMap.addPolyline(options)
     Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Waypoints")
   }
 
-  def handleStopResults(results: StopResults) {
+  def handleStopResults(stops: Seq[Stop]) {
     for (map <- Option(mapview.getMap);
-         stop <- results.stops) {
+         stop <- stops) {
       map.addMarker(new MarkerOptions()
         .position(new LatLng(stop.latitude, stop.longitude))
         .title(stop.name)
@@ -94,9 +95,9 @@ trait MapController extends ActorConversion {
     Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Stops")
   }
 
-  def handleVanResults(results: VanResults) {
+  def handleVanResults(vans: Seq[Van]) {
     for (map <- Option(mapview.getMap);
-         van <- results.vans) {
+         van <- vans) {
       map.addMarker(new MarkerOptions()
         .position(new LatLng(van.location.lat, van.location.lon))
         .title(s"${van.percentFull}%")
