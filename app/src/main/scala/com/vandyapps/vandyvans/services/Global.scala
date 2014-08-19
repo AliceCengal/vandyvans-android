@@ -22,9 +22,9 @@ class Global extends android.app.Application
   lazy val syncromatics = new Handler(serviceThread.getLooper, new SyncromaticsClient)
 
   def getColorFor(route: Route) = route match {
-    case Route.BLUE => getResources.getColor(R.color.blue_argb)
+    case Route.BLUE => getResources.getColor(R.color.dusky_gray)
     case Route.RED => getResources.getColor(R.color.red_argb)
-    case Route.GREEN => getResources.getColor(R.color.green_argb)
+    case Route.GREEN => getResources.getColor(R.color.dark_gold)
     case _ => getResources.getColor(android.R.color.black)
   }
 

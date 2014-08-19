@@ -8,9 +8,9 @@
 
     <string name="map_label">Map</string>
     <string name="stops_label">Stops</string>
-    <string name="route_blue">Blue</string>
+    <string name="route_blue">Black</string>
     <string name="route_red">Red</string>
-    <string name="route_green">Green</string>
+    <string name="route_green">Gold</string>
     <string name="arrivaltime_failure">Sorry, we could not get the Vandy Van arrival times for this stop right now.</string>
 
     <string name="reminders_label">Reminders</string>
