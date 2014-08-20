@@ -17,15 +17,15 @@ class TestHarzoo extends Activity
     with OverlayController
     with StopsController
 {
-  override def mapview = component[MapView](R.id.mapview)
+  override def mapview    = component[MapView](R.id.mapview)
   override def overlayBar = component[LinearLayout](R.id.linear1)
-  override def redBtn = component[Button](R.id.btn_red)
-  override def greenBtn = component[Button](R.id.btn_green)
-  override def blueBtn = component[Button](R.id.btn_blue)
+  override def redBtn     = component[Button](R.id.btn_red)
+  override def greenBtn   = component[Button](R.id.btn_green)
+  override def blueBtn    = component[Button](R.id.btn_blue)
 
-  override def pager = component[ViewAnimator](R.id.pager)
-  override def listBtn = component[Button](R.id.btn_list)
-  override def mapBtn = component[Button](R.id.btn_map)
+  override def pager    = component[ViewAnimator](R.id.pager)
+  override def listBtn  = component[Button](R.id.btn_list)
+  override def mapBtn   = component[Button](R.id.btn_map)
   override def stopList = component[ListView](R.id.listView1)
 
   override def onCreate(bundle: Bundle) {
@@ -133,16 +133,7 @@ trait StopsController extends ActorConversion {
             .withResource(R.layout.simple_text)
             .withStringer(StopToString)
             .build())
-          stopList.setOnItemClickListener(new AdapterView.OnItemClickListener {
-            override def onItemClick(parent: AdapterView[_],
-                                     view: View,
-                                     position: Int,
-                                     id: Long): Unit = {
-              DetailActivity.openForId(
-                parent.getItemAtPosition(position).asInstanceOf[Stop].id,
-                self)
-            }
-          })
+          stopList.setOnItemClickListener(StopItemClick)
         case _ =>
       }
     }
@@ -150,6 +141,17 @@ trait StopsController extends ActorConversion {
 
   private object StopToString extends ArrayAdapterBuilder.ToString[Stop] {
     override def apply(s: Stop) = s.name
+  }
+
+  private object StopItemClick extends AdapterView.OnItemClickListener {
+    override def onItemClick(parent: AdapterView[_],
+                             view: View,
+                             position: Int,
+                             id: Long): Unit = {
+      DetailActivity.openForId(
+        parent.getItemAtPosition(position).asInstanceOf[Stop].id,
+        self)
+    }
   }
 
   handler ! "init"

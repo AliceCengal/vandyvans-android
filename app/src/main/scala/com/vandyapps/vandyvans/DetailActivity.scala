@@ -9,7 +9,7 @@ import android.widget._
 import com.marsupial.eventhub.Helpers.EasyActivity
 import com.marsupial.eventhub.{ChattyActivity, AppInjection}
 import com.vandyapps.vandyvans.models.{Route, ArrivalTime, Stop}
-import com.vandyapps.vandyvans.services.{ReminderController, Global, Clients}
+import com.vandyapps.vandyvans.services.Global
 import com.vandyapps.vandyvans.services.SyncromaticsClient._
 import com.vandyapps.vandyvans.services.VandyVansClient._
 
