@@ -18,7 +18,7 @@ class StopActivity extends Activity
   lazy val mapFrag      = new StopsMap
   lazy val pagerAdapter = new SectionsPagerAdapter(this.getFragmentManager)
 
-  def viewPager = component[ViewPager](R.id.pager)
+  def viewPager = component[ViewPager](R.id.linear1)
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
