@@ -2,17 +2,20 @@ package com.vandyapps.vandyvans
 
 import android.app.Activity
 import android.os.{Message, Handler, Bundle}
-import android.widget.{ViewAnimator, ListView, LinearLayout, Button}
+import android.view.{View, MenuItem, Menu}
+import android.widget._
 import com.google.android.gms.maps.{MapsInitializer, MapView}
 import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
-import com.vandyapps.vandyvans.services.Global
+import com.vandyapps.vandyvans.models.{Route, Stop}
+import com.vandyapps.vandyvans.services.{VandyVansClient, Global}
 
 class TestHarzoo extends Activity
     with EasyActivity
     with AppInjection[Global]
     with MapController
     with OverlayController
+    with StopsController
 {
   override def mapview = component[MapView](R.id.mapview)
   override def overlayBar = component[LinearLayout](R.id.linear1)
@@ -23,7 +26,7 @@ class TestHarzoo extends Activity
   override def pager = component[ViewAnimator](R.id.pager)
   override def listBtn = component[Button](R.id.btn_list)
   override def mapBtn = component[Button](R.id.btn_map)
-  def stopList = component[ListView](R.id.listView1)
+  override def stopList = component[ListView](R.id.listView1)
 
   override def onCreate(bundle: Bundle) {
     super.onCreate(bundle)
@@ -65,6 +68,16 @@ class TestHarzoo extends Activity
     }
   }
 
+  override def onCreateOptionsMenu(menu: Menu) = {
+    getMenuInflater.inflate(R.menu.stop, menu); true
+  }
+
+  override def onOptionsItemSelected(item: MenuItem) = {
+    if (item.getItemId == R.id.action_settings) {
+      AboutsActivity.open(this); true
+    } else super.onOptionsItemSelected(item)
+  }
+
 }
 
 trait OverlayController extends ActorConversion {
@@ -74,7 +87,7 @@ trait OverlayController extends ActorConversion {
   def mapBtn: Button
   def listBtn: Button
 
-  implicit object handler extends Handler {
+  private[OverlayController] implicit object handler extends Handler {
     override def handleMessage(msg: Message): Unit = {
       msg.obj match {
         case "init" =>
@@ -103,12 +116,40 @@ trait OverlayController extends ActorConversion {
 trait StopsController extends ActorConversion {
   self: Activity with AppInjection[Global] =>
 
-  implicit object handler extends Handler {
+  import VandyVansClient._
+
+  def stopList: ListView
+
+  private[StopsController] implicit object handler extends Handler {
     override def handleMessage(msg: Message): Unit = {
-      case "init" =>
-        
-      case _ =>
+      msg.obj match {
+        case "init" =>
+          app.vandyVans ? FetchStops(Route.BLUE)
+
+        case VandyVansClient.StopResults(stops) =>
+          stopList.setAdapter(ArrayAdapterBuilder
+            .fromCollection(stops.toArray)
+            .withContext(self)
+            .withResource(R.layout.simple_text)
+            .withStringer(StopToString)
+            .build())
+          stopList.setOnItemClickListener(new AdapterView.OnItemClickListener {
+            override def onItemClick(parent: AdapterView[_],
+                                     view: View,
+                                     position: Int,
+                                     id: Long): Unit = {
+              DetailActivity.openForId(
+                parent.getItemAtPosition(position).asInstanceOf[Stop].id,
+                self)
+            }
+          })
+        case _ =>
+      }
     }
+  }
+
+  private object StopToString extends ArrayAdapterBuilder.ToString[Stop] {
+    override def apply(s: Stop) = s.name
   }
 
   handler ! "init"

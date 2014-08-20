@@ -16,7 +16,10 @@ import com.vandyapps.vandyvans.models._
 object VandyVansClient {
 
   case class FetchStops(route: Route)
+  case object FetchAllStops
+  case class FetchStopWith(id: Int)
   case class FetchWaypoints(route: Route)
+
   case class StopResults(stops: List[Stop])
   case class WaypointResults(waypoints: List[FloatPair])
 

@@ -7,10 +7,11 @@ import android.view.View
 import android.widget._
 
 import com.marsupial.eventhub.Helpers.EasyActivity
+import com.marsupial.eventhub.{ChattyActivity, AppInjection}
 import com.vandyapps.vandyvans.models.{Route, ArrivalTime, Stop}
 import com.vandyapps.vandyvans.services.{ReminderController, Global, Clients}
-import com.marsupial.eventhub.{ChattyActivity, AppInjection}
 import com.vandyapps.vandyvans.services.SyncromaticsClient._
+import com.vandyapps.vandyvans.services.VandyVansClient._
 
 class DetailActivity extends Activity
     with EasyActivity
@@ -56,16 +57,18 @@ class DetailActivity extends Activity
         case n => n
       }
 
-    stop = Stop.forId(stopId).get // fix
-    Option(getActionBar).foreach { _.setTitle(stop.name) }
-
-    app.syncromatics ? FetchArrivalTimes(stop)
+    app.vandyVans ? FetchStopWith(stopId)
   }
 
   override def handleMessage(msg: Message) = {
     msg.obj match {
       case x: ArrivalTimeResults =>
         displayArrivalTimes(x.times)
+      case StopResults(stops) =>
+        for (s <- stops; ab <- Option(getActionBar)) {
+          ab.setTitle(s.name)
+          app.syncromatics ? FetchArrivalTimes(s)
+        }
     }
     false
   }
