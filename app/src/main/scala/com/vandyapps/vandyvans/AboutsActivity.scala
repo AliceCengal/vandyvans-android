@@ -3,13 +3,12 @@ package com.vandyapps.vandyvans
 import android.app.Activity
 import android.content.{Context, Intent}
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 
 import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.models.Report
-import com.vandyapps.vandyvans.services.{Global, Clients}
+import com.vandyapps.vandyvans.services.Global
 
 class AboutsActivity extends Activity
     with EasyActivity
@@ -24,13 +23,11 @@ class AboutsActivity extends Activity
   def feedbackReport = component[Button](R.id.button2)
   def sourceCode = component[Button](R.id.button6)
 
-  val clients: Clients = app
-
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
     setContentView(R.layout.activity_about)
 
-    bugReport.setOnClickListener { v: View =>
+    bugReport.onClick {
       val i = new Intent(AboutsActivity.this, classOf[FormActivity])
       i.putExtra(TAG_FORMTYPE, TAG_BUG)
       i.putExtra(FormActivity.TAG_FORMTITLE, "Report a Bug")
@@ -38,7 +35,7 @@ class AboutsActivity extends Activity
       startActivityForResult(i, 1)
     }
 
-    feedbackReport.setOnClickListener { v: View =>
+    feedbackReport.onClick {
       val i = new Intent(AboutsActivity.this, classOf[FormActivity])
       i.putExtra(TAG_FORMTYPE, TAG_FEED)
       i.putExtra(FormActivity.TAG_FORMTITLE, "Send Feedback")
@@ -46,7 +43,7 @@ class AboutsActivity extends Activity
       startActivityForResult(i, 1)
     }
 
-    sourceCode.setOnClickListener { v: View =>
+    sourceCode.onClick {
       CodeAccessActivity.open(AboutsActivity.this)
     }
 
@@ -54,11 +51,11 @@ class AboutsActivity extends Activity
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     if (resultCode != Activity.RESULT_CANCELED) {
-      clients.vandyVans ! new Report(
-          data.getIntExtra(TAG_FORMTYPE, TAG_FEED) == TAG_BUG,
-          data.getStringExtra(FormActivity.RESULT_EMAIL),
-          data.getStringExtra(FormActivity.RESULT_BODY),
-          false)
+      app.vandyVans ! new Report(
+          isBugReport = data.getIntExtra(TAG_FORMTYPE, TAG_FEED) == TAG_BUG,
+          senderAddress = data.getStringExtra(FormActivity.RESULT_EMAIL),
+          bodyOfReport = data.getStringExtra(FormActivity.RESULT_BODY),
+          notifyWhenResolved = false)
     }
   }
 

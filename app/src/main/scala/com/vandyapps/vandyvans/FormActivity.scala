@@ -24,7 +24,7 @@ class FormActivity extends Activity with EasyActivity {
 
     setResult(Activity.RESULT_CANCELED)
 
-    submit.setOnClickListener { v: View =>
+    submit.onClick {
       val email = emailField.getText.toString
       val body = bodyField.getText.toString
 

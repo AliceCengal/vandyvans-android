@@ -59,7 +59,7 @@ object Helpers {
   /**
    * This mixin provide boilerplate free Fragment transactions.
    */
-  trait EasyActivity extends ListenerConversion {
+  trait EasyActivity {
     self: Activity =>
 
     def component[T](id: Int) = findViewById(id).asInstanceOf[T]
@@ -74,10 +74,4 @@ object Helpers {
 
   }
 
-  trait ListenerConversion {
-    implicit def funcToClickListener(func: View=>Unit): View.OnClickListener =
-        new OnClickListener {
-          override def onClick(v: View): Unit = { func(v) }
-        }
-  }
 }

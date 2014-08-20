@@ -17,11 +17,11 @@ class CodeAccessActivity extends Activity with EasyActivity {
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
     setContentView(R.layout.source_code_access)
-    openBrowser.setOnClickListener { v: View =>
+    openBrowser.onClick {
         startActivity(new Intent(Intent.ACTION_VIEW,
                                  Uri.parse(LINK_TO_REPOSITORY))) }
 
-    emailLink.setOnClickListener { v: View =>
+    emailLink.onClick {
         try {
           startActivity(Intent.createChooser(
             new Intent(Intent.ACTION_SEND)

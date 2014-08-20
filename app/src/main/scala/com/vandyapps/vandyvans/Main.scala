@@ -10,7 +10,7 @@ import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.models.{Route, Stop}
 import com.vandyapps.vandyvans.services.{VandyVansClient, Global}
 
-class TestHarzoo extends Activity
+class Main extends Activity
     with EasyActivity
     with AppInjection[Global]
     with MapController
