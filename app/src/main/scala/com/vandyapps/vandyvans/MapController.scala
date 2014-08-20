@@ -20,7 +20,7 @@ trait MapController extends ActorConversion {
   import VandyVansClient._
   import SyncromaticsClient._
 
-  var currentRoute = Route.BLUE
+  var currentRoute: Route = null
 
   def mapview: MapView
   def overlayBar: LinearLayout
@@ -40,6 +40,7 @@ trait MapController extends ActorConversion {
         blueBtn.onClick(routeSelected(Route.BLUE))
         redBtn.onClick(routeSelected(Route.RED))
         greenBtn.onClick(routeSelected(Route.GREEN))
+        routeSelected(Route.BLUE)
       case _ =>
     }
   }

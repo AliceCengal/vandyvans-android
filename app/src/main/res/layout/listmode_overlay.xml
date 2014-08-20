@@ -10,7 +10,8 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="#c0c0c0"
-        android:dividerHeight="1dp"></ListView>
+        android:dividerHeight="1dp"
+        android:layout_margin="8dp"></ListView>
 
     <Button
         android:layout_width="match_parent"
