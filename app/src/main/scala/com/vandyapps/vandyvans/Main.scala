@@ -124,7 +124,7 @@ trait StopsController extends ActorConversion {
     override def handleMessage(msg: Message): Unit = {
       msg.obj match {
         case "init" =>
-          app.vandyVans ? FetchStops(Route.BLUE)
+          app.vandyVans ? FetchAllStops
 
         case VandyVansClient.StopResults(stops) =>
           stopList.setAdapter(ArrayAdapterBuilder
