@@ -1,12 +1,12 @@
-package com.vandyapps.vandyvans
+package com.vandyapps.vandyvans.view
 
 import android.app.Activity
 import android.content.{Context, Intent}
 import android.os.Bundle
 import android.widget.Button
-
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
+import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.Report
 import com.vandyapps.vandyvans.services.Global
 

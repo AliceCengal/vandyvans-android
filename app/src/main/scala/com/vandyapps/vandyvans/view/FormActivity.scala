@@ -1,13 +1,13 @@
-package com.vandyapps.vandyvans
+package com.vandyapps.vandyvans.view
 
 import android.app.Activity
 import android.os.Bundle
-import android.view.View
-import android.widget.{Toast, Button, EditText, TextView}
+import android.widget.{Button, EditText, TextView, Toast}
 import com.marsupial.eventhub.Helpers.EasyActivity
+import com.vandyapps.vandyvans.R
 
 class FormActivity extends Activity with EasyActivity {
-  import FormActivity._
+  import com.vandyapps.vandyvans.view.FormActivity._
 
   def formTitle = component[TextView](R.id.textView1)
   def emailField = component[EditText](R.id.editText)

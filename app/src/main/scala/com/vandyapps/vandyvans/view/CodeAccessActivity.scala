@@ -1,12 +1,12 @@
-package com.vandyapps.vandyvans
+package com.vandyapps.vandyvans.view
 
 import android.app.Activity
-import android.content.{Intent, Context}
+import android.content.{Context, Intent}
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
-import android.widget.{Toast, Button}
+import android.widget.{Button, Toast}
 import com.marsupial.eventhub.Helpers.EasyActivity
+import com.vandyapps.vandyvans.R
 
 class CodeAccessActivity extends Activity with EasyActivity {
 

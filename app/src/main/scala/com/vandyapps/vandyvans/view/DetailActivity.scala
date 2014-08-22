@@ -1,14 +1,14 @@
-package com.vandyapps.vandyvans
+package com.vandyapps.vandyvans.view
 
 import android.app.Activity
-import android.content.{Intent, Context}
-import android.os.{Message, Bundle, Handler}
+import android.content.{Context, Intent}
+import android.os.{Bundle, Handler, Message}
 import android.view.View
 import android.widget._
-
 import com.marsupial.eventhub.Helpers.EasyActivity
-import com.marsupial.eventhub.{ChattyActivity, AppInjection}
-import com.vandyapps.vandyvans.models.{Route, ArrivalTime, Stop}
+import com.marsupial.eventhub.{AppInjection, ChattyActivity}
+import com.vandyapps.vandyvans.R
+import com.vandyapps.vandyvans.models.{ArrivalTime, Route, Stop}
 import com.vandyapps.vandyvans.services.Global
 import com.vandyapps.vandyvans.services.SyncromaticsClient._
 import com.vandyapps.vandyvans.services.VandyVansClient._
@@ -19,7 +19,7 @@ class DetailActivity extends Activity
     with AppInjection[Global]
     with ChattyActivity
 {
-  import DetailActivity._
+  import com.vandyapps.vandyvans.view.DetailActivity._
 
   def blueRL    = component[RelativeLayout](R.id.rl1)
   def blueDisp  = component[TextView](R.id.tv1)

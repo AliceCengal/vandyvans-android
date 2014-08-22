@@ -1,24 +1,26 @@
-package com.vandyapps.vandyvans
+package com.vandyapps.vandyvans.view
 
 import android.app.Activity
-import android.os.{Message, Handler}
+import android.os.{Handler, Message}
 import android.util.Log
 import android.view.View
 import android.widget.{Button, LinearLayout}
-
 import com.google.android.gms.maps.model._
-import com.google.android.gms.maps.{GoogleMap, MapView, CameraUpdateFactory}
+import com.google.android.gms.maps.{CameraUpdateFactory, GoogleMap, MapView}
+import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.vandyapps.vandyvans.R
+import com.vandyapps.vandyvans.models.{FloatPair, Route, Stop, Van}
+import com.vandyapps.vandyvans.services.Global
 
-import com.marsupial.eventhub.{AppInjection, ActorConversion}
-import com.vandyapps.vandyvans.models.{Van, FloatPair, Stop, Route}
-import com.vandyapps.vandyvans.services.{SyncromaticsClient, VandyVansClient, Global}
-
+/**
+ * Define behavior for the MapView and the bar overlay.
+ */
 trait MapController extends ActorConversion {
   self: Activity with AppInjection[Global] =>
 
-  import MapController._
-  import VandyVansClient._
-  import SyncromaticsClient._
+  import com.vandyapps.vandyvans.services.VandyVansClient._
+  import com.vandyapps.vandyvans.services.SyncromaticsClient._
+  import com.vandyapps.vandyvans.view.MapController._
 
   var currentRoute: Route = null
   var markerDict = Map.empty[Marker, Stop]

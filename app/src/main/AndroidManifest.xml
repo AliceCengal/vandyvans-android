@@ -34,16 +34,16 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DetailActivity"
+            android:name=".view.DetailActivity"
             android:screenOrientation="portrait"></activity>
         <activity
-            android:name=".AboutsActivity"
+            android:name=".view.AboutsActivity"
             android:screenOrientation="portrait"></activity>
         <activity
-            android:name=".FormActivity"
+            android:name=".view.FormActivity"
             android:screenOrientation="portrait"></activity>
         <activity
-            android:name=".CodeAccessActivity"
+            android:name=".view.CodeAccessActivity"
             android:screenOrientation="portrait"></activity>
 
         <service

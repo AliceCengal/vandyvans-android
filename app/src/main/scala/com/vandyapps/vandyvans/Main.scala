@@ -1,14 +1,14 @@
 package com.vandyapps.vandyvans
 
 import android.app.Activity
-import android.os.{Message, Handler, Bundle}
-import android.view.{View, MenuItem, Menu}
+import android.os.Bundle
+import android.view.{MenuItem, Menu}
 import android.widget._
 import com.google.android.gms.maps.{MapsInitializer, MapView}
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.marsupial.eventhub.AppInjection
 import com.marsupial.eventhub.Helpers.EasyActivity
-import com.vandyapps.vandyvans.models.{Route, Stop}
-import com.vandyapps.vandyvans.services.{VandyVansClient, Global}
+import com.vandyapps.vandyvans.services.Global
+import com.vandyapps.vandyvans.view._
 
 class Main extends Activity
     with EasyActivity
@@ -79,81 +79,4 @@ class Main extends Activity
     }
   }
 
-}
-
-trait OverlayController extends ActorConversion {
-  self: Activity with AppInjection[Global] =>
-
-  def pager: ViewAnimator
-  def mapBtn: Button
-  def listBtn: Button
-
-  private[OverlayController] implicit object handler extends Handler {
-    override def handleMessage(msg: Message): Unit = {
-      msg.obj match {
-        case "init" =>
-          mapBtn.onClick(gotoMap())
-          listBtn.onClick(gotoList())
-        case _ =>
-      }
-    }
-  }
-
-  def gotoList() {
-    pager.setInAnimation(self, R.anim.slide_in_top)
-    pager.setOutAnimation(self, R.anim.slide_out_bottom)
-    pager.setDisplayedChild(1)
-  }
-
-  def gotoMap() {
-    pager.setInAnimation(self, R.anim.slide_in_bottom) // dirty?
-    pager.setOutAnimation(self, R.anim.slide_out_top)
-    pager.setDisplayedChild(0)
-  }
-
-  handler ! "init"
-}
-
-trait StopsController extends ActorConversion {
-  self: Activity with AppInjection[Global] =>
-
-  import VandyVansClient._
-
-  def stopList: ListView
-
-  private[StopsController] implicit object handler extends Handler {
-    override def handleMessage(msg: Message): Unit = {
-      msg.obj match {
-        case "init" =>
-          app.vandyVans ? FetchAllStops
-
-        case VandyVansClient.StopResults(stops) =>
-          stopList.setAdapter(ArrayAdapterBuilder
-            .fromCollection(stops.toArray)
-            .withContext(self)
-            .withResource(R.layout.simple_text)
-            .withStringer(StopToString)
-            .build())
-          stopList.setOnItemClickListener(StopItemClick)
-        case _ =>
-      }
-    }
-  }
-
-  private object StopToString extends ArrayAdapterBuilder.ToString[Stop] {
-    override def apply(s: Stop) = s.name
-  }
-
-  private object StopItemClick extends AdapterView.OnItemClickListener {
-    override def onItemClick(parent: AdapterView[_],
-                             view: View,
-                             position: Int,
-                             id: Long): Unit = {
-      DetailActivity.openForId(
-        parent.getItemAtPosition(position).asInstanceOf[Stop].id,
-        self)
-    }
-  }
-
-  handler ! "init"
 }
