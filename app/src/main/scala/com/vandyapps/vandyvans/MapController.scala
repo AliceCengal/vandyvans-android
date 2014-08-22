@@ -64,9 +64,7 @@ trait MapController extends ActorConversion {
       app.vandyVans ? FetchStops(route)
       app.syncromatics ? FetchVans(route)
 
-      Option(mapview.getMap).foreach { map =>
-        map.clear()
-      }
+      Option(mapview.getMap).foreach(_.clear())
     }
   }
 

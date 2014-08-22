@@ -73,9 +73,10 @@ class Main extends Activity
   }
 
   override def onOptionsItemSelected(item: MenuItem) = {
-    if (item.getItemId == R.id.action_settings) {
-      AboutsActivity.open(this); true
-    } else super.onOptionsItemSelected(item)
+    item.getItemId match {
+      case R.id.action_settings => AboutsActivity.open(this); true
+      case _ => super.onOptionsItemSelected(item)
+    }
   }
 
 }
