@@ -44,6 +44,7 @@ private[services] class SyncromaticsClient
             .map { obj =>
               new Van(
                 obj.get(Van.TAG_ID).getAsInt,
+                obj.get(Van.TAG_NAME).getAsString,
                 obj.get(Van.TAG_PERCENT_FULL).getAsInt,
                 new FloatPair(
                   obj.get(Van.TAG_LATS).getAsDouble,

@@ -106,7 +106,7 @@ trait MapController extends ActorConversion {
          van <- vans) {
       map.addMarker(new MarkerOptions()
         .position(new LatLng(van.location.lat, van.location.lon))
-        .title(s"${van.percentFull}%")
+        .title(s"${van.name}: ${van.percentFull}% full")
         .draggable(false)
         .flat(true)
         .icon(BitmapDescriptorFactory.fromResource(R.drawable.van_icon))
