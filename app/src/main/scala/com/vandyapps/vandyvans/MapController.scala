@@ -6,8 +6,8 @@ import android.util.Log
 import android.view.View
 import android.widget.{Button, LinearLayout}
 
-import com.google.android.gms.maps.model.{PolylineOptions, BitmapDescriptorFactory, MarkerOptions, LatLng}
-import com.google.android.gms.maps.{MapView, CameraUpdateFactory}
+import com.google.android.gms.maps.model._
+import com.google.android.gms.maps.{GoogleMap, MapView, CameraUpdateFactory}
 
 import com.marsupial.eventhub.{AppInjection, ActorConversion}
 import com.vandyapps.vandyvans.models.{Van, FloatPair, Stop, Route}
@@ -21,6 +21,7 @@ trait MapController extends ActorConversion {
   import SyncromaticsClient._
 
   var currentRoute: Route = null
+  var markerDict = Map.empty[Marker, Stop]
 
   def mapview: MapView
   def overlayBar: LinearLayout
@@ -28,7 +29,7 @@ trait MapController extends ActorConversion {
   def redBtn: Button
   def greenBtn: Button
 
-  implicit lazy val bridge: Handler = new Handler() {
+  implicit object bridge extends Handler {
     override def handleMessage(msg: Message): Unit = msg.obj match {
       case WaypointResults(waypoints) =>
         Log.i(Global.APP_LOG_ID, s"$LOG_ID | Received Waypoints")
@@ -37,6 +38,7 @@ trait MapController extends ActorConversion {
       case StopResults(stops) => handleStopResults(stops)
       case VanResults(vans) => handleVanResults(vans)
       case "Init" =>
+        mapview.getMap.setOnInfoWindowClickListener(InfoWindowClick)
         blueBtn.onClick(routeSelected(Route.BLUE))
         redBtn.onClick(routeSelected(Route.RED))
         greenBtn.onClick(routeSelected(Route.GREEN))
@@ -81,6 +83,7 @@ trait MapController extends ActorConversion {
     for (way <- waypoints) {
       options.add(new LatLng(way.lat, way.lon))
     }
+    options.add(new LatLng(waypoints.head.lat, waypoints.head.lon))
     mapview.getMap.addPolyline(options)
     Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Waypoints")
   }
@@ -88,10 +91,12 @@ trait MapController extends ActorConversion {
   def handleStopResults(stops: Seq[Stop]) {
     for (map <- Option(mapview.getMap);
          stop <- stops) {
-      map.addMarker(new MarkerOptions()
-        .position(new LatLng(stop.latitude, stop.longitude))
-        .title(stop.name)
-        .draggable(false))
+      val option =
+        new MarkerOptions()
+          .position(new LatLng(stop.latitude, stop.longitude))
+          .title(stop.name)
+          .draggable(false)
+      markerDict += ((map.addMarker(option), stop))
     }
     Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Stops")
   }
@@ -106,6 +111,14 @@ trait MapController extends ActorConversion {
         .flat(true)
         .icon(BitmapDescriptorFactory.fromResource(R.drawable.van_icon))
         .anchor(0.5f, 0.5f))
+    }
+  }
+
+  object InfoWindowClick extends GoogleMap.OnInfoWindowClickListener {
+    override def onInfoWindowClick(marker: Marker): Unit = {
+      markerDict.get(marker).foreach {
+        s => DetailActivity.openForId(s.id, self)
+      }
     }
   }
 
