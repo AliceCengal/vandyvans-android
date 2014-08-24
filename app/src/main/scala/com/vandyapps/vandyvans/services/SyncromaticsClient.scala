@@ -49,7 +49,7 @@ private[services] class SyncromaticsClient
                 new FloatPair(
                   obj.get(Van.TAG_LATS).getAsDouble,
                   obj.get(Van.TAG_LOND).getAsDouble)) }
-
+        Log.i(Global.APP_LOG_ID, LOG_TAG + " | Receiving van request from " + requester.toString)
         requester ! VanResults(result)
         reader.close()
       } catch {

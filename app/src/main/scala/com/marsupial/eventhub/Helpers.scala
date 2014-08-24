@@ -1,7 +1,6 @@
 package com.marsupial.eventhub
 
 import android.app.{FragmentTransaction, Activity, Fragment}
-import android.view.View.OnClickListener
 import android.view.{View, ViewGroup, LayoutInflater}
 import android.os.Bundle
 

@@ -17,4 +17,6 @@ trait AndroidImplicit {
     }
   }
 
+  implicit def funToRunnable(fun: () => Unit) = new Runnable() { def run() = fun() }
+
 }

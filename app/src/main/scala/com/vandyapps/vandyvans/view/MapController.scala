@@ -3,11 +3,10 @@ package com.vandyapps.vandyvans.view
 import android.app.Activity
 import android.os.{Handler, Message}
 import android.util.Log
-import android.view.View
 import android.widget.{Button, LinearLayout}
 import com.google.android.gms.maps.model._
-import com.google.android.gms.maps.{CameraUpdateFactory, GoogleMap, MapView}
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.google.android.gms.maps.{GoogleMap, MapView}
+import com.marsupial.eventhub.{EventHub, ActorConversion, AppInjection}
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{FloatPair, Route, Stop, Van}
 import com.vandyapps.vandyvans.services.Global
@@ -22,8 +21,13 @@ trait MapController extends ActorConversion {
   import com.vandyapps.vandyvans.services.SyncromaticsClient._
   import com.vandyapps.vandyvans.view.MapController._
 
-  var currentRoute: Route = null
-  var markerDict = Map.empty[Marker, Stop]
+  private var currentRoute: Route = null
+  private var markerDict = Map.empty[Marker, Stop]
+  private var isLiveMapping = false
+
+  private var waypointsData = List.empty[FloatPair]
+  private var stopsData = List.empty[Stop]
+  private var vansData = List.empty[Van]
 
   def mapview: MapView
   def overlayBar: LinearLayout
@@ -31,30 +35,50 @@ trait MapController extends ActorConversion {
   def redBtn: Button
   def greenBtn: Button
 
-  implicit object bridge extends Handler {
+  private implicit object bridge extends Handler {
     override def handleMessage(msg: Message): Unit = msg.obj match {
       case WaypointResults(waypoints) =>
-        Log.i(Global.APP_LOG_ID, s"$LOG_ID | Received Waypoints")
-        Log.i(Global.APP_LOG_ID, s"$LOG_ID | $waypoints")
-        handleWaypointResult(waypoints)
-      case StopResults(stops) => handleStopResults(stops)
-      case VanResults(vans) => handleVanResults(vans)
+        waypointsData = waypoints
+        draw()
+
+      case StopResults(stops) =>
+        stopsData = stops
+        draw()
+
+      case VanResults(vans) =>
+        Log.i(Global.APP_LOG_ID, LOG_ID + " | Received Van location")
+        vansData = vans
+        draw()
+        if (isLiveMapping)
+          bridge.postDelayed(() => app.syncromatics ? FetchVans(currentRoute) , 5000)
+
       case "Init" =>
         mapview.getMap.setOnInfoWindowClickListener(InfoWindowClick)
         blueBtn.onClick(routeSelected(Route.BLUE))
         redBtn.onClick(routeSelected(Route.RED))
         greenBtn.onClick(routeSelected(Route.GREEN))
         routeSelected(Route.BLUE)
+        app.eventHub ? EventHub.Subscribe
+
+      case StartLiveMap => startLiveMapping()
+      case StopLiveMap => stopLiveMapping()
+
       case _ =>
     }
   }
 
-  lazy val defaultCamera =
-    CameraUpdateFactory.newLatLngZoom(
-      new LatLng(Global.DEFAULT_LATITUDE, Global.DEFAULT_LONGITUDE),
-      DEFAULT_ZOOM)
-
   bridge ! "Init"
+
+  def startLiveMapping() {
+    if (!isLiveMapping) {
+      isLiveMapping = true
+      app.syncromatics ? FetchVans(currentRoute)
+    }
+  }
+
+  def stopLiveMapping() {
+    isLiveMapping = false
+  }
 
   def routeSelected(route: Route) {
     if (currentRoute != route) {
@@ -65,16 +89,8 @@ trait MapController extends ActorConversion {
       app.vandyVans ? FetchWaypoints(route)
       app.vandyVans ? FetchStops(route)
       app.syncromatics ? FetchVans(route)
-
-      Option(mapview.getMap).foreach(_.clear())
     }
   }
-
-  def showOverlay(): Unit = overlayBar.setVisibility(View.VISIBLE)
-
-  def hideOverlay(): Unit = overlayBar.setVisibility(View.GONE)
-
-  def mapIsShown(): Unit = routeSelected(currentRoute)
 
   def handleWaypointResult(waypoints: Seq[FloatPair]) {
     val options = new PolylineOptions()
@@ -114,7 +130,44 @@ trait MapController extends ActorConversion {
     }
   }
 
-  object InfoWindowClick extends GoogleMap.OnInfoWindowClickListener {
+  private def draw() {
+    for (map <- Option(mapview.getMap)) {
+      map.clear()
+      // Draw waypoints
+      val options = new PolylineOptions()
+        .color(app.getColorFor(currentRoute))
+        .width(DEFAULT_WIDTH)
+      for (way <- waypointsData) {
+        options.add(new LatLng(way.lat, way.lon))
+      }
+      options.add(new LatLng(waypointsData.head.lat, waypointsData.head.lon))
+      map.addPolyline(options)
+
+      // Draw stops
+      for (s <- stopsData) {
+        val option =
+          new MarkerOptions()
+            .position(new LatLng(s.latitude, s.longitude))
+            .title(s.name)
+            .draggable(false)
+        markerDict += ((map.addMarker(option), s))
+      }
+
+      // Draw Vans
+      for (van <- vansData) {
+        map.addMarker(new MarkerOptions()
+          .position(new LatLng(van.location.lat, van.location.lon))
+          .title(s"${van.name}: ${van.percentFull}% full")
+          .draggable(false)
+          .flat(true)
+          .icon(BitmapDescriptorFactory.fromResource(R.drawable.van_icon))
+          .anchor(0.5f, 0.5f))
+      }
+
+    }
+  }
+
+  private object InfoWindowClick extends GoogleMap.OnInfoWindowClickListener {
     override def onInfoWindowClick(marker: Marker): Unit = {
       markerDict.get(marker).foreach {
         s => DetailActivity.openForId(s.id, self)
@@ -129,5 +182,8 @@ object MapController {
   val DEFAULT_ZOOM = 14.5f
   val DEFAULT_WIDTH = 5
   val LOG_ID = "MapController"
+
+  case object StartLiveMap
+  case object StopLiveMap
 
 }

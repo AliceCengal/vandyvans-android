@@ -1,17 +1,20 @@
 package com.vandyapps.vandyvans
 
 import android.app.Activity
-import android.os.Bundle
+import android.os.{Message, Handler, Bundle}
 import android.view.{MenuItem, Menu}
 import android.widget._
 import com.google.android.gms.maps.{MapsInitializer, MapView}
-import com.marsupial.eventhub.AppInjection
+import com.marsupial.eventhub.{ChattyActivity, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.services.Global
+import com.vandyapps.vandyvans.view.MapController._
 import com.vandyapps.vandyvans.view._
 
 class Main extends Activity
     with EasyActivity
+    with ChattyActivity
+    with Handler.Callback
     with AppInjection[Global]
     with MapController
     with OverlayController
@@ -28,6 +31,15 @@ class Main extends Activity
   override def mapBtn   = component[Button](R.id.btn_map)
   override def stopList = component[ListView](R.id.listView1)
 
+  override def handleMessage(msg: Message): Boolean = {
+    msg.obj match {
+      case OverlayController.ListMode => app.eventHub ! StartLiveMap
+      case OverlayController.MapMode => app.eventHub ! StopLiveMap
+      case _ =>
+    }
+    true
+  }
+
   override def onCreate(bundle: Bundle) {
     super.onCreate(bundle)
     setContentView(R.layout.activity_stop)
@@ -38,11 +50,13 @@ class Main extends Activity
   override def onResume() {
     super.onResume()
     mapview.onResume()
+    communicator.post(() => app.eventHub ! StartLiveMap)
   }
 
   override def onPause() {
     super.onPause()
     mapview.onPause()
+    app.eventHub ! StopLiveMap
   }
 
   override def onDestroy() {

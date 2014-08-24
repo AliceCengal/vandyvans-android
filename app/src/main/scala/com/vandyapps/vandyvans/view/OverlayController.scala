@@ -16,11 +16,13 @@ import com.vandyapps.vandyvans.services.Global
 trait OverlayController extends ActorConversion {
   self: Activity with AppInjection[Global] =>
 
+  import OverlayController._
+
   def pager: ViewAnimator
   def mapBtn: Button
   def listBtn: Button
 
-  private[OverlayController] implicit object handler extends Handler {
+  private implicit object handler extends Handler {
     override def handleMessage(msg: Message): Unit = {
       msg.obj match {
         case "init" =>
@@ -35,13 +37,22 @@ trait OverlayController extends ActorConversion {
     pager.setInAnimation(self, R.anim.slide_in_top)
     pager.setOutAnimation(self, R.anim.slide_out_bottom)
     pager.setDisplayedChild(1)
+    app.eventHub ! ListMode
   }
 
   def gotoMap() {
     pager.setInAnimation(self, R.anim.slide_in_bottom) // dirty?
     pager.setOutAnimation(self, R.anim.slide_out_top)
     pager.setDisplayedChild(0)
+    app.eventHub ! MapMode
   }
 
   handler ! "init"
+}
+
+object OverlayController {
+
+  case object MapMode
+  case object ListMode
+
 }
