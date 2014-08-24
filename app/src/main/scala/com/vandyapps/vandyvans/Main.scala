@@ -8,7 +8,6 @@ import com.google.android.gms.maps.{MapsInitializer, MapView}
 import com.marsupial.eventhub.{ChattyActivity, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.services.Global
-import com.vandyapps.vandyvans.view.MapController._
 import com.vandyapps.vandyvans.view._
 
 class Main extends Activity
@@ -33,8 +32,8 @@ class Main extends Activity
 
   override def handleMessage(msg: Message): Boolean = {
     msg.obj match {
-      case OverlayController.ListMode => app.eventHub ! StartLiveMap
-      case OverlayController.MapMode => app.eventHub ! StopLiveMap
+      case OverlayController.ListMode => stopLiveMapping()
+      case OverlayController.MapMode => startLiveMapping()
       case _ =>
     }
     true
@@ -50,13 +49,13 @@ class Main extends Activity
   override def onResume() {
     super.onResume()
     mapview.onResume()
-    communicator.post(() => app.eventHub ! StartLiveMap)
+    communicator.post(() => startLiveMapping())
   }
 
   override def onPause() {
     super.onPause()
     mapview.onPause()
-    app.eventHub ! StopLiveMap
+    stopLiveMapping()
   }
 
   override def onDestroy() {

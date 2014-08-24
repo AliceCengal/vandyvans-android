@@ -49,8 +49,11 @@ trait MapController extends ActorConversion {
         Log.i(Global.APP_LOG_ID, LOG_ID + " | Received Van location")
         vansData = vans
         draw()
-        if (isLiveMapping)
-          bridge.postDelayed(() => app.syncromatics ? FetchVans(currentRoute) , 5000)
+
+        bridge.postDelayed(() =>
+          if (isLiveMapping)
+            app.syncromatics ? FetchVans(currentRoute) ,
+          5000)
 
       case "Init" =>
         mapview.getMap.setOnInfoWindowClickListener(InfoWindowClick)
@@ -58,7 +61,7 @@ trait MapController extends ActorConversion {
         redBtn.onClick(routeSelected(Route.RED))
         greenBtn.onClick(routeSelected(Route.GREEN))
         routeSelected(Route.BLUE)
-        app.eventHub ? EventHub.Subscribe
+        //app.eventHub ? EventHub.Subscribe
 
       case StartLiveMap => startLiveMapping()
       case StopLiveMap => stopLiveMapping()

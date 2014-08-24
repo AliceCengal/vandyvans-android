@@ -62,13 +62,14 @@ class DetailActivity extends Activity
 
   override def handleMessage(msg: Message) = {
     msg.obj match {
-      case x: ArrivalTimeResults =>
-        displayArrivalTimes(x.times)
+      case ArrivalTimeResults(times) =>
+        displayArrivalTimes(times)
       case StopResults(stops) =>
         for (s <- stops; ab <- Option(getActionBar)) {
           ab.setTitle(s.name)
           app.syncromatics ? FetchArrivalTimes(s)
         }
+      case _ =>
     }
     false
   }
