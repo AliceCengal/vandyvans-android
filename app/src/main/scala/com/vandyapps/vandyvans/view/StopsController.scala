@@ -5,9 +5,10 @@ import android.os.{Handler, Message}
 import android.view.View
 import android.widget.{AdapterView, ListView}
 import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.vandyapps.vandyvans.library.ArrayAdapterBuilder
 import com.vandyapps.vandyvans.models.Stop
 import com.vandyapps.vandyvans.services.{Global, VandyVansClient}
-import com.vandyapps.vandyvans.{ArrayAdapterBuilder, R}
+import com.vandyapps.vandyvans.R
 
 /**
  * Defines the behavior of the list of stop in Main Activity. Pull the list of Stops from Services.

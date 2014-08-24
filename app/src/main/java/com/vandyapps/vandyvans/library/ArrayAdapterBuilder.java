@@ -1,4 +1,4 @@
-package com.vandyapps.vandyvans;
+package com.vandyapps.vandyvans.library;
 
 import java.util.Arrays;
 import java.util.LinkedList;
