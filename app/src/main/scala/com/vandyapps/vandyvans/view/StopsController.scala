@@ -8,7 +8,6 @@ import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.vandyapps.vandyvans.library.ArrayAdapterBuilder
 import com.vandyapps.vandyvans.models.Stop
 import com.vandyapps.vandyvans.services.{Global, VandyVansClient}
-import com.vandyapps.vandyvans.R
 
 /**
  * Defines the behavior of the list of stop in Main Activity. Pull the list of Stops from Services.
@@ -33,7 +32,7 @@ trait StopsController extends ActorConversion {
           stopList.setAdapter(ArrayAdapterBuilder
             .fromCollection(stops.toArray)
             .withContext(self)
-            .withResource(R.layout.simple_text)
+            .withResource(android.R.layout.simple_list_item_1)
             .withStringer(StopToString)
             .build())
           stopList.setOnItemClickListener(StopItemClick)

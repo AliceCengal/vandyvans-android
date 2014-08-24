@@ -9,13 +9,20 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:divider="#c0c0c0"
+        android:background="@drawable/floating_list"
+        android:divider="#e0e0e0"
         android:dividerHeight="1dp"
-        android:layout_margin="8dp"></ListView>
+        android:layout_marginTop="@dimen/activity_vertical_margin"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_marginBottom="0dp"></ListView>
 
     <Button
-        android:layout_width="match_parent"
+        style="@style/page_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_gravity="center_horizontal"
         android:text="Map"
         android:id="@+id/btn_map" />
 

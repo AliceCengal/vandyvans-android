@@ -4,11 +4,14 @@
     android:layout_height="match_parent">
 
     <Button
-        android:layout_width="match_parent"
+        style="@style/page_button"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="List"
+        android:id="@+id/btn_list"
         android:layout_alignParentTop="true"
-        android:id="@+id/btn_list" />
+        android:layout_margin="8dp"
+        android:layout_centerHorizontal="true" />
 
     <LinearLayout
         android:id="@+id/linear1"

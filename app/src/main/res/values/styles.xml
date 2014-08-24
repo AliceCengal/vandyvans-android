@@ -46,4 +46,10 @@
     <color name="red_argb">#ffff0000</color>
     <color name="green_argb">#ff00ff00</color>
 
+    <style name="page_button">
+        <item name="android:background">@drawable/darkgold_to_white</item>
+        <item name="android:paddingLeft">40dp</item>
+        <item name="android:paddingRight">40dp</item>
+    </style>
+
 </resources>
