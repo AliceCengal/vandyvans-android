@@ -9,8 +9,8 @@ android {
         applicationId "com.vandyapps.vandyvans"
         minSdkVersion 15
         targetSdkVersion 19
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
     }
 
     sourceSets {
@@ -35,9 +35,7 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     // You must install or update the Support Repository through the SDK manager to use this dependency.
-    compile 'com.android.support:support-v13:19.+'
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.android.gms:play-services:5.0.77'
-    compile 'com.android.support:appcompat-v7:19.+'
     compile 'org.scala-lang:scala-library:2.11.1'
 }

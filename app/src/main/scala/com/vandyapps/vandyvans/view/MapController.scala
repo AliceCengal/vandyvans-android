@@ -6,7 +6,7 @@ import android.util.Log
 import android.widget.{Button, LinearLayout}
 import com.google.android.gms.maps.model._
 import com.google.android.gms.maps.{GoogleMap, MapView}
-import com.marsupial.eventhub.{EventHub, ActorConversion, AppInjection}
+import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{FloatPair, Route, Stop, Van}
 import com.vandyapps.vandyvans.services.Global

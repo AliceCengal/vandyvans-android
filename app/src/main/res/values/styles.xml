@@ -32,8 +32,10 @@
         <item name="android:gravity">center_horizontal</item>
     </style>
 
-    <color name="light_gold">#ffffdc</color>
+    <color name="light_gold">#f0e0b0</color>
     <color name="white">#ffffff</color>
+
+    <color name="medium_gold">#e6c000</color>
     <color name="dark_gold">#B69000</color>
 
     <color name="dusky_gray">#303050</color>
@@ -47,7 +49,7 @@
     <color name="green_argb">#ff00ff00</color>
 
     <style name="page_button">
-        <item name="android:background">@drawable/darkgold_to_white</item>
+        <item name="android:background">@drawable/page_button</item>
         <item name="android:paddingLeft">40dp</item>
         <item name="android:paddingRight">40dp</item>
     </style>
