@@ -136,15 +136,18 @@ trait MapController extends ActorConversion {
   private def draw() {
     for (map <- Option(mapview.getMap)) {
       map.clear()
+      
       // Draw waypoints
-      val options = new PolylineOptions()
-        .color(app.getColorFor(currentRoute))
-        .width(DEFAULT_WIDTH)
-      for (way <- waypointsData) {
-        options.add(new LatLng(way.lat, way.lon))
+      if (waypointsData.nonEmpty) {
+        val options = new PolylineOptions()
+          .color(app.getColorFor(currentRoute))
+          .width(DEFAULT_WIDTH)
+        for (way <- waypointsData) {
+          options.add(new LatLng(way.lat, way.lon))
+        }
+        options.add(new LatLng(waypointsData.head.lat, waypointsData.head.lon))
+        map.addPolyline(options)
       }
-      options.add(new LatLng(waypointsData.head.lat, waypointsData.head.lon))
-      map.addPolyline(options)
 
       // Draw stops
       for (s <- stopsData) {
