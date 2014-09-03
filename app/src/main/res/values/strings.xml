@@ -34,7 +34,7 @@
     <string name="creator">Athran Rahman</string>
     <string name="designer">Fletcher Young</string>
 
-    <string name="sourcecode_statement">VandyApps is a free open-source software under the Batman license. The source code is available at:</string>
+    <string name="sourcecode_statement">VandyApps is a free open-source software released under the MIT license. The source code is available at:</string>
     <string name="sourcecode_link">https://github.com/VandyApps/vandyvans-android</string>
     <string name="sourcecode_open_in_browser">Open in browser</string>
     <string name="sourcecode_emaillink">Email link</string>

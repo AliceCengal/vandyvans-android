@@ -23,7 +23,6 @@ class FormActivity extends Activity with EasyActivity {
     bodyField.setHint(conf.hint)
 
     setResult(Activity.RESULT_CANCELED)
-
     submit.onClick(submitForm())
   }
 
@@ -50,11 +49,11 @@ class FormActivity extends Activity with EasyActivity {
 }
 
 object FormActivity {
-  val TAG_FORMTITLE     = "form_title"
+  val TAG_FORMTITLE    = "form_title"
   val TAG_FORMBODYHINT = "form_body_hint"
-  val RESULT_EMAIL      = "result_email"
-  val RESULT_BODY       = "result_body"
-  val RESULT_EXIST      = 9090
+  val RESULT_EMAIL     = "result_email"
+  val RESULT_BODY      = "result_body"
+  val RESULT_EXIST     = 9090
 
   case class FormConfig(title: String, hint: String)
 

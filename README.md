@@ -2,15 +2,15 @@ Vandy Vans
 ==========
 
 Vandy Vans is an open-source Android project created by [Vanderbilt University](http://vanderbilt.edu) students 
-through a student organization called [VandyApps](https://www.facebook.com/VandyMobile).
+through the student organization [VandyApps](https://www.facebook.com/VandyMobile).
 
 The purpose of the app is to provide a fast, native way for Vanderbilt students to access the van schedule as well 
 as a live map of the vans' locations on their Android phones.
 
 ## Credits
 
-Vandy Vans for Android was created by [Batman](http://uncyclopedia.wikia.com/wiki/Batman_\(person\)), inspired by 
-the original [Vandy Vans for iOS](github.com/VandyApps/vandyvans-ios).
+Vandy Vans for Android was created by [Athran Rahman](https://github.com/AliceCengal), inspired by
+the original [Vandy Vans for iOS](https://github.com/VandyApps/vandyvans-ios).
 
 The graphic design for the project was done by [Fletcher Young](http://vandycommodore.deviantart.com/).
 
@@ -20,10 +20,10 @@ original [Vandy Vans web application](http://vandyvans.com/).
 ## Contact
 
 You can submit any bug reports or feedback either directly through the app or by emailing 
-[vandyvansapp@gmail.com](mailto:vandyvansapp@gmail.com).
+[vandyapps@gmail.com](mailto:vandyapps@gmail.com).
 
 ## Building the app
 
-It is recommended to use Android Studio or IntelliJ IDEA. Install the Scala language plugin.
+You should use Android Studio or IntelliJ IDEA. Install the Scala language plugin.
 
 
