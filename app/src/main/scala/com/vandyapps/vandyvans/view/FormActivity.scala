@@ -20,25 +20,26 @@ class FormActivity extends Activity with EasyActivity {
 
     val conf = readConfig(getIntent.getExtras)
     formTitle.setText(conf.title)
-    bodyField.setText(conf.hint)
+    bodyField.setHint(conf.hint)
 
     setResult(Activity.RESULT_CANCELED)
 
-    submit.onClick {
-      val email = emailField.getText.toString
-      val body = bodyField.getText.toString
+    submit.onClick(submitForm())
+  }
 
-      if (email == null || email.isEmpty) {
-        showMessage("Please fill in your email address")
-      } else if (body == null || body.isEmpty) {
-        showMessage("Please fill in the description")
-      } else {
-        setResult(RESULT_EXIST,
-                  getIntent.putExtra(RESULT_EMAIL, email)
-                           .putExtra(RESULT_BODY, body))
-        FormActivity.this.finish()
-      }
+  def submitForm(): Unit = {
+    val email = emailField.getText.toString
+    val body = bodyField.getText.toString
 
+    if (email == null || email.isEmpty) {
+      showMessage("Please fill in your email address")
+    } else if (body == null || body.isEmpty) {
+      showMessage("Please fill in the description")
+    } else {
+      setResult(RESULT_EXIST,
+        getIntent.putExtra(RESULT_EMAIL, email)
+          .putExtra(RESULT_BODY, body))
+      FormActivity.this.finish()
     }
   }
 
