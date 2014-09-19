@@ -9,5 +9,6 @@ object Route {
 
   def getAll = List(BLUE, RED, GREEN)
 
-  def getForId(id: Int) = getAll.find(_.id == id).getOrElse(BLUE)
+  def getForId(id: Int): Route =
+    getAll.find(_.id == id).getOrElse(BLUE)
 }
