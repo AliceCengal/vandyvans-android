@@ -19,4 +19,13 @@ trait AndroidImplicit {
 
   implicit def funToRunnable(fun: () => Unit) = new Runnable() { def run() = fun() }
 
+  implicit class ControlAddon[T](target: T) {
+
+    def forward[U](func: T=>U): U = func(target)
+
+    def returnAfter(proc: =>Unit): T = { proc; target }
+
+  }
+
+
 }
