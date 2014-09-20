@@ -72,9 +72,8 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
             .execute()
             .body().charStream()
             .forward { stream =>
-              parser.parse(stream).getAsJsonArray
+              parser.parse(stream).getAsJsonArray.toList
                 .map(elem => Stop.fromJson(elem.getAsJsonObject))
-                .toList
                 .forward { ss => ss.returnAfter(allStops += (route -> ss)) }
                 .returnAfter(stream.close())}
       })
@@ -92,8 +91,20 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
   override def waypoints(route: Route)
                         (implicit exec: ExecutionContext): Future[List[(Double, Double)]] =
     Future {
-
-      null
+      allWaypoints.getOrElse(route, {
+        client
+          .newCall(request.url(VansClient.waypointsFetchUrl(route)).build)
+          .execute()
+          .body.charStream()
+          .forward { stream =>
+            parser.parse(stream).getAsJsonArray.get(0).getAsJsonArray.toList
+              .map(_.getAsJsonObject)
+              .map { obj =>
+                (obj.get(FloatPair.TAG_LAT).getAsDouble,
+                  obj.get(FloatPair.TAG_LON).getAsDouble)}
+              .forward {ss => ss.returnAfter(allWaypoints += (route -> ss))}
+              .returnAfter(stream.close())}
+      })
     }
 
   override def arrivalTimes(stop: Stop)
@@ -110,15 +121,16 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
                   .get("Predictions").getAsJsonArray
                   .get(0).getAsJsonObject
                   .forward(jobj =>
-                  ArrivalTime(
-                    stop = stop,
-                    route = r,
-                    minutes = jobj.get("Minutes").getAsInt)) }
+                    ArrivalTime(
+                      stop = stop,
+                      route = r,
+                      minutes = jobj.get("Minutes").getAsInt)) }
           }.toOption }
         .flatten
     }
 
-  override def postReport(report: Report)(implicit exec: ExecutionContext): Future[Unit] =
+  override def postReport(report: Report)
+                         (implicit exec: ExecutionContext): Future[Unit] =
     Future {
       VansClient.postReportUsingParseApi(report)
     }
@@ -152,6 +164,9 @@ private[services] object VansClient {
 
   def arrivalFetchUrl(stop: Stop, route: Route) =
     s"$SYN_BASE_URL/Route/${route.id}/Stop/${stop.id}/Arrivals$SYN_API_KEY"
+
+  def waypointsFetchUrl(route: Route) =
+    s"$VV_BASE_URL/Route/${route.waypointId}/Waypoints"
 
   private def postReportUsingParseApi(report: Report) {
     val reportObj = new ParseObject(REPORT_CLASSNAME)
