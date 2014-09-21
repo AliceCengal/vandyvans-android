@@ -2,15 +2,13 @@ package com.vandyapps.vandyvans.services
 
 import scala.collection.JavaConversions._
 import scala.concurrent.{Future, ExecutionContext}
+import scala.util.Try
 import android.os.Handler
 import android.app.Application
-import android.content.Context
 import com.google.gson.JsonParser
 import com.parse.ParseObject
 import com.squareup.okhttp.{Request, OkHttpClient}
 import com.vandyapps.vandyvans.models._
-
-import scala.util.Try
 
 trait Clients {
   def vandyVans: Handler
@@ -42,7 +40,7 @@ trait VansServerCalls {
 private[services] class VansClient(app: Application) extends VansServerCalls {
 
   lazy val client  = new OkHttpClient
-  lazy val prefs   = app.getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
+  //lazy val prefs   = app.getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
   lazy val parser  = new JsonParser
   lazy val request = new Request.Builder
   var allStops     = Map.empty[Route, List[Stop]]
@@ -82,10 +80,7 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
   override def stopsWithId(id: Int)
                           (implicit exec: ExecutionContext): Future[Stop] =
     Future {
-      val resultStream =
-        client
-          .newCall(request.url(VansClient.stopsFetchUrl(null)).build())
-      null
+      allStops.values.flatten.find(_.id == id).get
     }
 
   override def waypoints(route: Route)
