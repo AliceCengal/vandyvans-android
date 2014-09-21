@@ -48,6 +48,21 @@ class Global extends android.app.Application
       "6XOkxBODp8HZANJaxFhEfSFPZ8H93Pt9531Htt1X",
       "61wOewMMN0YISmX3UM79PGssnTsz1NfkOOMOsHMm")
 
+    cacheInstatement()
+  }
+
+  def subscribeReminderForStop(stopdId: Int): Unit =
+    reminders.subscribeReminderForStop(stopdId)
+
+  def unsubscribeReminderForStop(stopId: Int): Unit =
+    reminders.unsubscribeReminderForStop(stopId)
+
+  def isSubscribedToStop(stopId: Int): Boolean =
+    reminders.isSubscribedToStop(stopId)
+
+  def services: VansServerCalls = servicesHolder
+
+  private def cacheInstatement(): Unit = {
     if (cacheManager.hasCache && !cacheManager.isCacheExpired) {
       val data = new JsonParser().parse(cacheManager.retrieveCache).getAsJsonObject
 
@@ -122,17 +137,6 @@ class Global extends android.app.Application
       }
     }
   }
-
-  def subscribeReminderForStop(stopdId: Int): Unit =
-    reminders.subscribeReminderForStop(stopdId)
-
-  def unsubscribeReminderForStop(stopId: Int): Unit =
-    reminders.unsubscribeReminderForStop(stopId)
-
-  def isSubscribedToStop(stopId: Int): Boolean =
-    reminders.isSubscribedToStop(stopId)
-
-  def services: VansServerCalls = servicesHolder
 
 }
 
