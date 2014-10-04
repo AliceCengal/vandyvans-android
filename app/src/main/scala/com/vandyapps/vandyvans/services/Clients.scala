@@ -42,7 +42,6 @@ trait VansServerCalls {
 private[services] class VansClient(app: Application) extends VansServerCalls {
 
   lazy val client  = new OkHttpClient
-  //lazy val prefs   = app.getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
   lazy val parser  = new JsonParser
   lazy val request = new Request.Builder
   var allStops     = Map.empty[Route, List[Stop]]

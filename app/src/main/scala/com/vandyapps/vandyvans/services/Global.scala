@@ -4,7 +4,7 @@ import java.io.{StringWriter, OutputStreamWriter}
 import java.net.URL
 import scala.collection.JavaConversions._
 import android.content.{SharedPreferences, Context}
-import android.os.{Handler, HandlerThread}
+import android.os.{AsyncTask, Handler, HandlerThread}
 import android.util.Log
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonWriter
@@ -13,6 +13,8 @@ import com.parse.Parse
 import com.marsupial.eventhub.{Initialize, EventfulApp}
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Stop, Route}
+
+import scala.concurrent.ExecutionContext
 
 class Global extends android.app.Application
                      with EventfulApp
@@ -27,8 +29,8 @@ class Global extends android.app.Application
 
   val servicesHolder = new VansClient(this)
 
-  val prefs   = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
-  val cacheManager = new CacheManager(prefs)
+  lazy val prefs   = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
+  lazy val cacheManager = new DataCache(prefs)
 
   def getColorFor(route: Route) = route match {
     case Route.BLUE => getResources.getColor(R.color.dusky_gray)
@@ -68,23 +70,27 @@ class Global extends android.app.Application
 
       Route.getAll.foreach { route =>
         val stops = data.get(route.name + "Stop").getAsJsonArray
+          .toList
           .map(j => Stop.fromJson(j.getAsJsonObject))
         servicesHolder.allStops += route -> stops
 
         val points = data.get(route.name + "Points").getAsJsonArray
+          .toList
           .map(ps => ps.getAsString.split(","))
           .map(nums => (nums(0).toDouble, nums(1).toDouble))
         servicesHolder.allWaypoints += route -> points
       }
 
     } else {
-      val redStops = servicesHolder.stops(Route.RED)
+      implicit val executionContext =
+        ExecutionContext.fromExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+      val redStops   = servicesHolder.stops(Route.RED)
       val greenStops = servicesHolder.stops(Route.GREEN)
-      val blueStops = servicesHolder.stops(Route.BLUE)
-      val redPath = servicesHolder.waypoints(Route.RED)
-      val greenPath = servicesHolder.waypoints(Route.GREEN)
-      val bluePath = servicesHolder.waypoints(Route.BLUE)
-      val handler = new Handler()
+      val blueStops  = servicesHolder.stops(Route.BLUE)
+      val redPath    = servicesHolder.waypoints(Route.RED)
+      val greenPath  = servicesHolder.waypoints(Route.GREEN)
+      val bluePath   = servicesHolder.waypoints(Route.BLUE)
+      val handler    = new Handler()
 
       for (rs <- redStops;
            gs <- greenStops;
@@ -162,7 +168,7 @@ object Global {
   }
 }
 
-private[services] class CacheManager(prefs: SharedPreferences) {
+private[services] class DataCache(prefs: SharedPreferences) {
 
   val GLOBAL_DATA_CACHE = "GLOBAL_DATA_CACHE"
   val GLOBAL_CACHE_TIME = "GLOBAL_CACHE_TIME"
@@ -186,5 +192,9 @@ private[services] class CacheManager(prefs: SharedPreferences) {
   }
 
   def retrieveCache = prefs.getString(GLOBAL_DATA_CACHE, "")
+
+}
+
+private[services] class UserSettings(prefs: SharedPreferences) {
 
 }
