@@ -1,5 +1,7 @@
 package com.vandyapps.vandyvans.services
 
+import java.io.Reader
+
 import scala.collection.JavaConversions._
 import scala.concurrent.{Future, ExecutionContext}
 import scala.util.Try
@@ -49,10 +51,7 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
   override def vans(route: Route)
                    (implicit exec: ExecutionContext): Future[List[Van]] =
     Future {
-      client
-        .newCall(request.url(VansClient.vanFetchUrl(route)).build())
-        .execute()
-        .body().charStream()
+      fetchAsStream(VansClient.vanFetchUrl(route))
         .forward { stream =>
           parser.parse(stream).getAsJsonArray
             .map(elem => Van.fromJson(elem.getAsJsonObject))
@@ -65,10 +64,7 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
                     (implicit exec: ExecutionContext): Future[List[Stop]] =
     Future {
       allStops.getOrElse(route,  {
-          client
-            .newCall(request.url(VansClient.stopsFetchUrl(route)).build)
-            .execute()
-            .body().charStream()
+          fetchAsStream(VansClient.stopsFetchUrl(route))
             .forward { stream =>
               parser.parse(stream).getAsJsonArray.toList
                 .map(elem => Stop.fromJson(elem.getAsJsonObject))
@@ -87,10 +83,7 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
                         (implicit exec: ExecutionContext): Future[List[(Double, Double)]] =
     Future {
       allWaypoints.getOrElse(route, {
-        client
-          .newCall(request.url(VansClient.waypointsFetchUrl(route)).build)
-          .execute()
-          .body.charStream()
+        fetchAsStream(VansClient.waypointsFetchUrl(route))
           .forward { stream =>
             parser.parse(stream).getAsJsonArray.get(0).getAsJsonArray.toList
               .map(_.getAsJsonObject)
@@ -108,9 +101,7 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
       Route.getAll
         .map { r =>
           Try {
-            client.newCall(request.url(VansClient.arrivalFetchUrl(stop, r)).build())
-              .execute()
-              .body.charStream()
+            fetchAsStream(VansClient.arrivalFetchUrl(stop, r))
               .forward { stream =>
                 parser.parse(stream).getAsJsonObject
                   .get("Predictions").getAsJsonArray
@@ -129,6 +120,9 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
     Future {
       VansClient.postReportUsingParseApi(report)
     }
+
+  def fetchAsStream(url: String): Reader =
+    client.newCall(request.url(url).build()).execute().body().charStream()
 
 }
 
