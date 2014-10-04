@@ -2,22 +2,22 @@ package com.vandyapps.vandyvans.view
 
 import android.app.Activity
 import android.content.{Context, Intent}
-import android.os.{Bundle, Handler, Message}
+import android.os.Bundle
 import android.view.View
 import android.widget._
+import com.cengallut.asyncactivity.AsyncActivity
 import com.marsupial.eventhub.Helpers.EasyActivity
-import com.marsupial.eventhub.{AppInjection, ChattyActivity}
+import com.marsupial.eventhub.AppInjection
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{ArrivalTime, Route, Stop}
 import com.vandyapps.vandyvans.services.Global
-import com.vandyapps.vandyvans.services.SyncromaticsClient._
-import com.vandyapps.vandyvans.services.VandyVansClient._
+
+import scala.util.{Failure, Success}
 
 class DetailActivity extends Activity
     with EasyActivity
-    with Handler.Callback
     with AppInjection[Global]
-    with ChattyActivity
+    with AsyncActivity
 {
   import com.vandyapps.vandyvans.view.DetailActivity._
 
@@ -57,21 +57,16 @@ class DetailActivity extends Activity
         case n => n
       }
 
-    app.vandyVans ? FetchStopWith(stopId)
-  }
-
-  override def handleMessage(msg: Message) = {
-    msg.obj match {
-      case ArrivalTimeResults(times) =>
-        displayArrivalTimes(times)
-      case StopResults(stops) =>
-        for (s <- stops; ab <- Option(getActionBar)) {
-          ab.setTitle(s.name)
-          app.syncromatics ? FetchArrivalTimes(s)
-        }
-      case _ =>
-    }
-    false
+    app.services.stopsWithId(stopId)
+      .andThen { case Success(s) => displayName(s) }
+      .flatMap(s => app.services.arrivalTimes(s))
+      .onCompleteForUi {
+        case Success(arrivals) =>
+          displayArrivalTimes(arrivals)
+        case Failure(ex) =>
+          arrivalLoading.setVisibility(View.GONE)
+          failureText.setVisibility(View.VISIBLE)
+      }
   }
 
   def displayArrivalTimes(times: Iterable[ArrivalTime]) {
@@ -93,6 +88,12 @@ class DetailActivity extends Activity
         }
       }
     }
+  }
+
+  def displayName(s: Stop): Unit = {
+    runOnUiThread(new Runnable() {
+      override def run(): Unit = getActionBar.setTitle(s.name)
+    })
   }
 
   def getStopId = stop.id
