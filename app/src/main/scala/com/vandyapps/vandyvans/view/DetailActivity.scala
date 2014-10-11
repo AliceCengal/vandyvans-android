@@ -58,7 +58,7 @@ class DetailActivity extends Activity
       }
 
     app.services.stopsWithId(stopId)
-      .andThen { case Success(s) => displayName(s) }
+      .andThenForUi { case Success(s) => getActionBar.setTitle(s.name) }
       .flatMap(s => app.services.arrivalTimes(s))
       .onCompleteForUi {
         case Success(arrivals) =>
@@ -88,12 +88,6 @@ class DetailActivity extends Activity
         }
       }
     }
-  }
-
-  def displayName(s: Stop): Unit = {
-    runOnUiThread(new Runnable() {
-      override def run(): Unit = getActionBar.setTitle(s.name)
-    })
   }
 
   def getStopId = stop.id
