@@ -39,7 +39,7 @@ trait VansServerCalls {
 
 }
 
-private[services] class VansClient(app: Application) extends VansServerCalls {
+private[services] class VansClient extends VansServerCalls {
 
   lazy val client  = new OkHttpClient
   lazy val parser  = new JsonParser
@@ -50,25 +50,28 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
   override def vans(route: Route)
                    (implicit exec: ExecutionContext): Future[List[Van]] =
     Future {
-      fetchAsStream(VansClient.vanFetchUrl(route))
-        .forward { stream =>
+      val stream =
+        fetchAsStream(VansClient.vanFetchUrl(route))
+      val vanResult =
           parser.parse(stream).getAsJsonArray
             .map(elem => Van.fromJson(elem.getAsJsonObject))
             .toList
-            .returnAfter(stream.close())
-        }
+      stream.close()
+      vanResult
     }
 
   override def stops(route: Route)
                     (implicit exec: ExecutionContext): Future[List[Stop]] =
     Future {
-      allStops.getOrElse(route,  {
+      allStops.getOrElse(route, {
+        val stream =
           fetchAsStream(VansClient.stopsFetchUrl(route))
-            .forward { stream =>
-              parser.parse(stream).getAsJsonArray.toList
-                .map(elem => Stop.fromJson(elem.getAsJsonObject))
-                .forward { ss => ss.returnAfter(allStops += (route -> ss)) }
-                .returnAfter(stream.close())}
+        val stopsResult =
+          parser.parse(stream).getAsJsonArray.toList
+            .map(elem => Stop.fromJson(elem.getAsJsonObject))
+        allStops += (route -> stopsResult)
+        stream.close()
+        stopsResult
       })
     }
 
@@ -82,15 +85,15 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
                         (implicit exec: ExecutionContext): Future[List[(Double, Double)]] =
     Future {
       allWaypoints.getOrElse(route, {
-        fetchAsStream(VansClient.waypointsFetchUrl(route))
-          .forward { stream =>
-            parser.parse(stream).getAsJsonArray.get(0).getAsJsonArray.toList
-              .map(_.getAsJsonObject)
-              .map { obj =>
-                (obj.get(FloatPair.TAG_LAT).getAsDouble,
-                  obj.get(FloatPair.TAG_LON).getAsDouble)}
-              .forward {ss => ss.returnAfter(allWaypoints += (route -> ss))}
-              .returnAfter(stream.close())}
+        val stream =
+          fetchAsStream(VansClient.waypointsFetchUrl(route))
+        val pointsResult =
+          parser.parse(stream).getAsJsonArray.get(0).getAsJsonArray.toList
+            .map(_.getAsJsonObject)
+            .map(FloatPair.asPair _ compose FloatPair.fromJson)
+        allWaypoints += (route -> pointsResult)
+        stream.close()
+        pointsResult
       })
     }
 
@@ -100,16 +103,17 @@ private[services] class VansClient(app: Application) extends VansServerCalls {
       Route.getAll
         .map { r =>
           Try {
-            fetchAsStream(VansClient.arrivalFetchUrl(stop, r))
-              .forward { stream =>
-                parser.parse(stream).getAsJsonObject
-                  .get("Predictions").getAsJsonArray
-                  .get(0).getAsJsonObject
-                  .forward(jobj =>
-                    ArrivalTime(
-                      stop = stop,
-                      route = r,
-                      minutes = jobj.get("Minutes").getAsInt)) }
+            val stream =
+              fetchAsStream(VansClient.arrivalFetchUrl(stop, r))
+            val arrivalResultObject =
+              parser.parse(stream).getAsJsonObject
+                .get("Predictions").getAsJsonArray
+                .get(0).getAsJsonObject
+
+            ArrivalTime(
+              stop = stop,
+              route = r,
+              minutes = arrivalResultObject.get("Minutes").getAsInt)
           }.toOption }
         .flatten
     }
