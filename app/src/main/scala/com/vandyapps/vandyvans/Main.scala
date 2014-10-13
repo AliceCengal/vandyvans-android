@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.{Message, Handler, Bundle}
 import android.view.{MenuItem, Menu}
 import android.widget._
+import com.cengallut.asyncactivity.AsyncActivity
 import com.google.android.gms.maps.{MapsInitializer, MapView}
 import com.marsupial.eventhub.{ChattyActivity, AppInjection}
 import com.marsupial.eventhub.Helpers.EasyActivity
@@ -18,6 +19,7 @@ class Main extends Activity
     with MapController
     with OverlayController
     with StopsController
+    with AsyncActivity
 {
   override def mapview    = component[MapView](R.id.mapview)
   override def overlayBar = component[LinearLayout](R.id.linear1)

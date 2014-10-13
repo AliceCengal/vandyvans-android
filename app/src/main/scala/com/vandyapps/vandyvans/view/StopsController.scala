@@ -4,10 +4,13 @@ import android.app.Activity
 import android.os.{Handler, Message}
 import android.view.View
 import android.widget.{AdapterView, ListView}
+import com.cengallut.asyncactivity.AsyncActivity
 import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.vandyapps.vandyvans.library.ArrayAdapterBuilder
 import com.vandyapps.vandyvans.models.Stop
 import com.vandyapps.vandyvans.services.{Global, VandyVansClient}
+
+import scala.util.Success
 
 /**
  * Defines the behavior of the list of stop in Main Activity. Pull the list of Stops from Services.
@@ -16,29 +19,22 @@ import com.vandyapps.vandyvans.services.{Global, VandyVansClient}
  * Created by athran on 8/22/14.
  */
 trait StopsController extends ActorConversion {
-  self: Activity with AppInjection[Global] =>
-
-  import com.vandyapps.vandyvans.services.VandyVansClient._
+  self: Activity with AppInjection[Global] with AsyncActivity =>
 
   def stopList: ListView
 
-  private[StopsController] implicit object handler extends Handler {
-    override def handleMessage(msg: Message): Unit = {
-      msg.obj match {
-        case "init" =>
-          app.vandyVans ? FetchAllStops
-
-        case VandyVansClient.StopResults(stops) =>
+  private[StopsController] val bridge = handler {
+    case "init" =>
+      app.services.stopsForAllRoutes().onCompleteForUi {
+        case Success(ss) =>
           stopList.setAdapter(ArrayAdapterBuilder
-            .fromCollection(stops.toArray)
+            .fromCollection(ss.toArray)
             .withContext(self)
             .withResource(android.R.layout.simple_list_item_1)
             .withStringer(StopToString)
             .build())
           stopList.setOnItemClickListener(StopItemClick)
-        case _ =>
       }
-    }
   }
 
   private object StopToString extends ArrayAdapterBuilder.ToString[Stop] {
@@ -56,5 +52,5 @@ trait StopsController extends ActorConversion {
     }
   }
 
-  handler ! "init"
+  bridge ! "init"
 }

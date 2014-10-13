@@ -1,5 +1,6 @@
 package com.vandyapps.vandyvans.library
 
+import android.os.{Message, Handler}
 import android.view.View
 import android.view.View.OnClickListener
 
@@ -25,6 +26,14 @@ trait AndroidImplicit {
 
     def returnAfter(proc: =>Unit): T = { proc; target }
 
+  }
+
+  def handler(c: PartialFunction[AnyRef, Unit]): Handler = {
+    new Handler() {
+      override def handleMessage(msg: Message): Unit = {
+        if (c.isDefinedAt(msg.obj)) c(msg.obj)
+      }
+    }
   }
 
 

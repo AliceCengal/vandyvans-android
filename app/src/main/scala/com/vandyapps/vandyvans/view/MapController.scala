@@ -4,20 +4,22 @@ import android.app.Activity
 import android.os.{Handler, Message}
 import android.util.Log
 import android.widget.{Button, LinearLayout}
+import com.cengallut.asyncactivity.AsyncActivity
 import com.google.android.gms.maps.model._
 import com.google.android.gms.maps.{GoogleMap, MapView}
 import com.marsupial.eventhub.{ActorConversion, AppInjection}
 import com.vandyapps.vandyvans.R
-import com.vandyapps.vandyvans.models.{FloatPair, Route, Stop, Van}
+import com.vandyapps.vandyvans.models.{Route, Stop, Van}
 import com.vandyapps.vandyvans.services.Global
+
+import scala.util.Success
 
 /**
  * Define behavior for the MapView and the bar overlay.
  */
 trait MapController extends ActorConversion {
-  self: Activity with AppInjection[Global] =>
+  self: Activity with AppInjection[Global] with AsyncActivity =>
 
-  import com.vandyapps.vandyvans.services.VandyVansClient._
   import com.vandyapps.vandyvans.services.SyncromaticsClient._
   import com.vandyapps.vandyvans.view.MapController._
 
@@ -25,8 +27,6 @@ trait MapController extends ActorConversion {
   private var markerDict = Map.empty[Marker, Stop]
   private var isLiveMapping = false
 
-  private var waypointsData = List.empty[FloatPair]
-  private var stopsData = List.empty[Stop]
   private var vansData = List.empty[Van]
 
   def mapview: MapView
@@ -37,14 +37,6 @@ trait MapController extends ActorConversion {
 
   private implicit object bridge extends Handler {
     override def handleMessage(msg: Message): Unit = msg.obj match {
-      case WaypointResults(waypoints) =>
-        waypointsData = waypoints
-        draw()
-
-      case StopResults(stops) =>
-        stopsData = stops
-        draw()
-
       case VanResults(vans) =>
         Log.i(Global.APP_LOG_ID, LOG_ID + " | Received Van location")
         vansData = vans
@@ -75,7 +67,7 @@ trait MapController extends ActorConversion {
   def startLiveMapping() {
     if (!isLiveMapping) {
       isLiveMapping = true
-      app.syncromatics ? FetchVans(currentRoute)
+      //app.syncromatics ? FetchVans(currentRoute)
     }
   }
 
@@ -89,36 +81,20 @@ trait MapController extends ActorConversion {
       overlayBar.setBackgroundColor(app.getColorFor(currentRoute))
 
       // Requesting data from the services.
-      app.vandyVans ? FetchWaypoints(route)
-      app.vandyVans ? FetchStops(route)
+      app.services.waypoints(route).onCompleteForUi {
+        case Success(ws) => drawWaypoints(mapview.getMap, ws) }
+
+      app.services.stops(route).onCompleteForUi {
+        case Success(ss) => drawStops(mapview.getMap, ss) }
+
+      app.services.vans(route).onCompleteForUi {
+        case Success(vs) =>
+      }
+
       app.syncromatics ? FetchVans(route)
     }
   }
 
-  def handleWaypointResult(waypoints: Seq[FloatPair]) {
-    val options = new PolylineOptions()
-      .color(app.getColorFor(currentRoute))
-      .width(DEFAULT_WIDTH)
-    for (way <- waypoints) {
-      options.add(new LatLng(way.lat, way.lon))
-    }
-    options.add(new LatLng(waypoints.head.lat, waypoints.head.lon))
-    mapview.getMap.addPolyline(options)
-    Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Waypoints")
-  }
-
-  def handleStopResults(stops: Seq[Stop]) {
-    for (map <- Option(mapview.getMap);
-         stop <- stops) {
-      val option =
-        new MarkerOptions()
-          .position(new LatLng(stop.latitude, stop.longitude))
-          .title(stop.name)
-          .draggable(false)
-      markerDict += ((map.addMarker(option), stop))
-    }
-    Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Stops")
-  }
 
   def handleVanResults(vans: Seq[Van]) {
     for (map <- Option(mapview.getMap);
@@ -136,28 +112,6 @@ trait MapController extends ActorConversion {
   private def draw() {
     for (map <- Option(mapview.getMap)) {
       map.clear()
-      
-      // Draw waypoints
-      if (waypointsData.nonEmpty) {
-        val options = new PolylineOptions()
-          .color(app.getColorFor(currentRoute))
-          .width(DEFAULT_WIDTH)
-        for (way <- waypointsData) {
-          options.add(new LatLng(way.lat, way.lon))
-        }
-        options.add(new LatLng(waypointsData.head.lat, waypointsData.head.lon))
-        map.addPolyline(options)
-      }
-
-      // Draw stops
-      for (s <- stopsData) {
-        val option =
-          new MarkerOptions()
-            .position(new LatLng(s.latitude, s.longitude))
-            .title(s.name)
-            .draggable(false)
-        markerDict += ((map.addMarker(option), s))
-      }
 
       // Draw Vans
       for (van <- vansData) {
@@ -170,6 +124,30 @@ trait MapController extends ActorConversion {
           .anchor(0.5f, 0.5f))
       }
 
+    }
+  }
+
+  def drawWaypoints(map: GoogleMap, waypoints: Seq[(Double,Double)]): Unit = {
+    if (waypoints.nonEmpty) {
+      val options = new PolylineOptions()
+        .color(app.getColorFor(currentRoute))
+        .width(DEFAULT_WIDTH)
+      for (way <- waypoints) {
+        options.add(new LatLng(way._1, way._2))
+      }
+      options.add(new LatLng(waypoints.head._1, waypoints.head._2))
+      map.addPolyline(options)
+    }
+  }
+
+  def drawStops(map: GoogleMap, stops: Seq[Stop]): Unit = {
+    for (s <- stops) {
+      val option =
+        new MarkerOptions()
+          .position(new LatLng(s.latitude, s.longitude))
+          .title(s.name)
+          .draggable(false)
+      markerDict += ((map.addMarker(option), s))
     }
   }
 

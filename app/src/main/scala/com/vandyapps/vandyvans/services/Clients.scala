@@ -28,6 +28,8 @@ trait VansServerCalls {
   def stops(route: Route)
            (implicit exec: ExecutionContext): Future[List[Stop]]
 
+  def stopsForAllRoutes()(implicit exec: ExecutionContext): Future[List[Stop]]
+
   def stopsWithId(id: Int)
                  (implicit exec: ExecutionContext): Future[Stop]
 
@@ -73,6 +75,11 @@ private[services] class VansClient extends VansServerCalls {
         stream.close()
         stopsResult
       })
+    }
+
+  override def stopsForAllRoutes()(implicit exec: ExecutionContext): Future[List[Stop]] =
+    Future {
+      allStops.values.flatten.toList
     }
 
   override def stopsWithId(id: Int)

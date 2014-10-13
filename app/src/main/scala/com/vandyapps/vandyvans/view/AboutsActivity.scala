@@ -27,7 +27,6 @@ class AboutsActivity extends Activity
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
     setContentView(R.layout.activity_about)
-
     bugReport.onClick {
       val i = new Intent(AboutsActivity.this, classOf[FormActivity])
       i.putExtra(TAG_FORMTYPE, TAG_BUG)
