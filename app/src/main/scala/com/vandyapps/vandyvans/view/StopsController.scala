@@ -1,15 +1,13 @@
 package com.vandyapps.vandyvans.view
 
 import android.app.Activity
-import android.os.{Handler, Message}
 import android.view.View
 import android.widget.{AdapterView, ListView}
 import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
-import com.marsupial.eventhub.{ActorConversion}
 import com.vandyapps.vandyvans.library.ArrayAdapterBuilder
 import com.vandyapps.vandyvans.models.Stop
-import com.vandyapps.vandyvans.services.{Global, VandyVansClient}
+import com.vandyapps.vandyvans.services.Global
 
 import scala.util.Success
 
@@ -19,12 +17,12 @@ import scala.util.Success
  *
  * Created by athran on 8/22/14.
  */
-trait StopsController extends ActorConversion {
+trait StopsController {
   self: Activity with AppInjection[Global] with AsyncActivity =>
 
   def stopList: ListView
 
-  private[StopsController] val bridge = handler {
+  private[StopsController] val bridge = handler() {
     case "init" =>
       app.services.stopsForAllRoutes().onCompleteForUi {
         case Success(ss) =>
@@ -53,5 +51,5 @@ trait StopsController extends ActorConversion {
     }
   }
 
-  bridge ! "init"
+  bridge.send("init")
 }

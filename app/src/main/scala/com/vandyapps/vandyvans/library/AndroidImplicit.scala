@@ -1,6 +1,6 @@
 package com.vandyapps.vandyvans.library
 
-import android.os.{Message, Handler}
+import android.app.Activity
 import android.view.View
 import android.view.View.OnClickListener
 
@@ -28,13 +28,10 @@ trait AndroidImplicit {
 
   }
 
-  def handler(c: PartialFunction[AnyRef, Unit]): Handler = {
-    new Handler() {
-      override def handleMessage(msg: Message): Unit = {
-        if (c.isDefinedAt(msg.obj)) c(msg.obj)
-      }
-    }
-  }
+  implicit class ViewAccess(a: Activity) {
 
+    def component[V](id: Int): V = a.findViewById(id).asInstanceOf[V]
+
+  }
 
 }

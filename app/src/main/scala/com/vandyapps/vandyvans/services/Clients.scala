@@ -5,17 +5,10 @@ import java.io.Reader
 import scala.collection.JavaConversions._
 import scala.concurrent.{Future, ExecutionContext}
 import scala.util.Try
-import android.os.Handler
-import android.app.Application
 import com.google.gson.JsonParser
 import com.parse.ParseObject
 import com.squareup.okhttp.{Request, OkHttpClient}
 import com.vandyapps.vandyvans.models._
-
-trait Clients {
-  def vandyVans: Handler
-  def syncromatics: Handler
-}
 
 trait VansServerCalls {
 

@@ -7,7 +7,6 @@ import android.view.View
 import android.widget._
 import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
-import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{ArrivalTime, Route, Stop}
 import com.vandyapps.vandyvans.services.Global
@@ -15,27 +14,26 @@ import com.vandyapps.vandyvans.services.Global
 import scala.util.{Failure, Success}
 
 class DetailActivity extends Activity
-    with EasyActivity
     with AppInjection[Global]
     with AsyncActivity
 {
   import com.vandyapps.vandyvans.view.DetailActivity._
 
-  def blueRL    = component[RelativeLayout](R.id.rl1)
-  def blueDisp  = component[TextView](R.id.tv1)
-  def redRL     = component[RelativeLayout](R.id.rl2)
-  def redDisp   = component[TextView](R.id.tv2)
-  def greenRL   = component[RelativeLayout](R.id.rl3)
-  def greenDisp = component[TextView](R.id.tv3)
+  def blueRL    = this.component[RelativeLayout](R.id.rl1)
+  def blueDisp  = this.component[TextView](R.id.tv1)
+  def redRL     = this.component[RelativeLayout](R.id.rl2)
+  def redDisp   = this.component[TextView](R.id.tv2)
+  def greenRL   = this.component[RelativeLayout](R.id.rl3)
+  def greenDisp = this.component[TextView](R.id.tv3)
 
   lazy val blueGroup  = new ArrivalTimeViewHolder(blueRL, blueDisp)
   lazy val redGroup   = new ArrivalTimeViewHolder(redRL, redDisp)
   lazy val greenGroup = new ArrivalTimeViewHolder(greenRL, greenDisp)
 
-  def arrivalLoading = component[ProgressBar](R.id.progress1)
-  def failureText    = component[TextView](R.id.tv4)
-  def reminderText   = component[TextView](R.id.tv5)
-  def reminderSwitch = component[Switch](R.id.cb1)
+  def arrivalLoading = this.component[ProgressBar](R.id.progress1)
+  def failureText    = this.component[TextView](R.id.tv4)
+  def reminderText   = this.component[TextView](R.id.tv5)
+  def reminderSwitch = this.component[Switch](R.id.cb1)
 
   lazy val reminderViewController =
     new ReminderViewController(reminderSwitch, reminderText, this)

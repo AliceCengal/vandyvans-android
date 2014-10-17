@@ -6,14 +6,12 @@ import android.os.Bundle
 import android.widget.Button
 import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
-import com.marsupial.eventhub.Helpers.EasyActivity
 
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.Report
 import com.vandyapps.vandyvans.services.Global
 
 class AboutsActivity extends Activity
-    with EasyActivity
     with AppInjection[Global]
     with AsyncActivity
 {
@@ -21,9 +19,9 @@ class AboutsActivity extends Activity
   val TAG_BUG = 1000
   val TAG_FEED = 1111
 
-  def bugReport = component[Button](R.id.button1)
-  def feedbackReport = component[Button](R.id.button2)
-  def sourceCode = component[Button](R.id.button6)
+  def bugReport = this.component[Button](R.id.button1)
+  def feedbackReport = this.component[Button](R.id.button2)
+  def sourceCode = this.component[Button](R.id.button6)
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)

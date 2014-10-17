@@ -1,14 +1,11 @@
 package com.vandyapps.vandyvans.view
 
 import android.app.Activity
-import android.os.{Handler, Message}
-import android.util.Log
 import android.widget.{Button, LinearLayout}
 import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
 import com.google.android.gms.maps.model._
 import com.google.android.gms.maps.{GoogleMap, MapView}
-import com.marsupial.eventhub.{ActorConversion}
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Route, Stop, Van}
 import com.vandyapps.vandyvans.services.Global
@@ -18,10 +15,9 @@ import scala.util.Success
 /**
  * Define behavior for the MapView and the bar overlay.
  */
-trait MapController extends ActorConversion {
+trait MapController {
   self: Activity with AppInjection[Global] with AsyncActivity =>
 
-  import com.vandyapps.vandyvans.services.SyncromaticsClient._
   import com.vandyapps.vandyvans.view.MapController._
 
   private var currentRoute: Route = null
@@ -36,34 +32,34 @@ trait MapController extends ActorConversion {
   def redBtn: Button
   def greenBtn: Button
 
-  private implicit object bridge extends Handler {
-    override def handleMessage(msg: Message): Unit = msg.obj match {
-      case VanResults(vans) =>
-        Log.i(Global.APP_LOG_ID, LOG_ID + " | Received Van location")
-        vansData = vans
-        draw()
+  val bridge = handler() {
+    /*
+    case VanResults(vans) =>
+      Log.i(Global.APP_LOG_ID, LOG_ID + " | Received Van location")
+      vansData = vans
+      draw()
 
-        bridge.postDelayed(() =>
-          if (isLiveMapping)
-            app.syncromatics ? FetchVans(currentRoute) ,
-          5000)
+      bridge.postDelayed(5000) {
+        if (isLiveMapping)
+          app.services.vans(currentRoute).onCompleteForUi {
+            case Success(vs) =>()
+          }
+      }
+*/
+    case "Init" =>
+      mapview.getMap.setOnInfoWindowClickListener(InfoWindowClick)
+      blueBtn.onClick(routeSelected(Route.BLUE))
+      redBtn.onClick(routeSelected(Route.RED))
+      greenBtn.onClick(routeSelected(Route.GREEN))
+      routeSelected(Route.BLUE)
 
-      case "Init" =>
-        mapview.getMap.setOnInfoWindowClickListener(InfoWindowClick)
-        blueBtn.onClick(routeSelected(Route.BLUE))
-        redBtn.onClick(routeSelected(Route.RED))
-        greenBtn.onClick(routeSelected(Route.GREEN))
-        routeSelected(Route.BLUE)
-        //app.eventHub ? EventHub.Subscribe
+    case StartLiveMap => startLiveMapping()
+    case StopLiveMap => stopLiveMapping()
 
-      case StartLiveMap => startLiveMapping()
-      case StopLiveMap => stopLiveMapping()
-
-      case _ =>
-    }
+    case _ =>
   }
 
-  bridge ! "Init"
+  bridge.send("init")
 
   def startLiveMapping() {
     if (!isLiveMapping) {
@@ -92,7 +88,7 @@ trait MapController extends ActorConversion {
         case Success(vs) =>
       }
 
-      app.syncromatics ? FetchVans(route)
+      //app.syncromatics ? FetchVans(route)
     }
   }
 

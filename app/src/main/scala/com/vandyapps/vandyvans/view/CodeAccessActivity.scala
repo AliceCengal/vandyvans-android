@@ -5,14 +5,13 @@ import android.content.{Context, Intent}
 import android.net.Uri
 import android.os.Bundle
 import android.widget.{Button, Toast}
-import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.R
 
-class CodeAccessActivity extends Activity with EasyActivity {
+class CodeAccessActivity extends Activity {
 
   lazy val LINK_TO_REPOSITORY = getString(R.string.sourcecode_link)
-  def openBrowser = component[Button](R.id.btn1)
-  def emailLink = component[Button](R.id.btn2)
+  def openBrowser = this.component[Button](R.id.btn1)
+  def emailLink = this.component[Button](R.id.btn2)
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)

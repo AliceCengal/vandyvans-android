@@ -2,6 +2,8 @@ package com.vandyapps.vandyvans.services
 
 import java.io.{StringWriter, OutputStreamWriter}
 import java.net.URL
+import com.cengallut.handlerextension.MessageHub
+
 import scala.collection.JavaConversions._
 import android.content.{SharedPreferences, Context}
 import android.os.{AsyncTask, Handler, HandlerThread}
@@ -10,24 +12,18 @@ import com.google.gson.JsonParser
 import com.google.gson.stream.JsonWriter
 import com.parse.Parse
 
-import com.marsupial.eventhub.{Initialize, EventfulApp}
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Stop, Route}
 
 import scala.concurrent.ExecutionContext
 
 class Global extends android.app.Application
-                     with EventfulApp
-                     with Clients
                      with ReminderController
 {
   private lazy val reminders = new SimpleReminderController(this)
   private lazy val serviceThread = new HandlerThread("BackgroundThread")
 
-  lazy val vandyVans = new Handler(serviceThread.getLooper, new VandyVansClient)
-  lazy val syncromatics = new Handler(serviceThread.getLooper, new SyncromaticsClient)
-
-  val servicesHolder = new VansClient(this)
+  private val servicesHolder = new VansClient
 
   lazy val prefs   = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
   lazy val cacheManager = new DataCache(prefs)
@@ -43,8 +39,6 @@ class Global extends android.app.Application
     super.onCreate()
     serviceThread.start()
     reminders.start()
-
-    List(vandyVans, syncromatics).foreach { _ ! Initialize(this) }
 
     Parse.initialize(this,
       "6XOkxBODp8HZANJaxFhEfSFPZ8H93Pt9531Htt1X",
@@ -63,6 +57,8 @@ class Global extends android.app.Application
     reminders.isSubscribedToStop(stopId)
 
   def services: VansServerCalls = servicesHolder
+
+  lazy val eventHub = MessageHub.create
 
   private def cacheInstatement(): Unit = {
     if (cacheManager.hasCache && !cacheManager.isCacheExpired) {

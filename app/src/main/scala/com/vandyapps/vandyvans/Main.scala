@@ -4,16 +4,13 @@ import android.app.Activity
 import android.os.{Message, Handler, Bundle}
 import android.view.{MenuItem, Menu}
 import android.widget._
+import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
 import com.google.android.gms.maps.{MapsInitializer, MapView}
-import com.marsupial.eventhub.{ChattyActivity, AppInjection}
-import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.services.Global
 import com.vandyapps.vandyvans.view._
 
 class Main extends Activity
-    with EasyActivity
-    with ChattyActivity
     with Handler.Callback
     with AppInjection[Global]
     with MapController
@@ -21,16 +18,16 @@ class Main extends Activity
     with StopsController
     with AsyncActivity
 {
-  override def mapview    = component[MapView](R.id.mapview)
-  override def overlayBar = component[LinearLayout](R.id.linear1)
-  override def redBtn     = component[Button](R.id.btn_red)
-  override def greenBtn   = component[Button](R.id.btn_green)
-  override def blueBtn    = component[Button](R.id.btn_blue)
+  override def mapview    = this.component[MapView](R.id.mapview)
+  override def overlayBar = this.component[LinearLayout](R.id.linear1)
+  override def redBtn     = this.component[Button](R.id.btn_red)
+  override def greenBtn   = this.component[Button](R.id.btn_green)
+  override def blueBtn    = this.component[Button](R.id.btn_blue)
 
-  override def pager    = component[ViewAnimator](R.id.pager)
-  override def listBtn  = component[Button](R.id.btn_list)
-  override def mapBtn   = component[Button](R.id.btn_map)
-  override def stopList = component[ListView](R.id.listView1)
+  override def pager    = this.component[ViewAnimator](R.id.pager)
+  override def listBtn  = this.component[Button](R.id.btn_list)
+  override def mapBtn   = this.component[Button](R.id.btn_map)
+  override def stopList = this.component[ListView](R.id.listView1)
 
   override def handleMessage(msg: Message): Boolean = {
     msg.obj match {
@@ -51,7 +48,7 @@ class Main extends Activity
   override def onResume() {
     super.onResume()
     mapview.onResume()
-    communicator.post(() => startLiveMapping())
+    (new Handler).postNow(startLiveMapping())
   }
 
   override def onPause() {
