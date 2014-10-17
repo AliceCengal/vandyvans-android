@@ -4,9 +4,10 @@ import android.app.Activity
 import android.content.{Context, Intent}
 import android.os.Bundle
 import android.widget.Button
+import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
 import com.marsupial.eventhub.Helpers.EasyActivity
-import com.marsupial.eventhub.AppInjection
+
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.Report
 import com.vandyapps.vandyvans.services.Global

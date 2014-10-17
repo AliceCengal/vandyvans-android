@@ -4,8 +4,9 @@ import android.app.Activity
 import android.os.{Handler, Message}
 import android.view.View
 import android.widget.{AdapterView, ListView}
+import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.marsupial.eventhub.{ActorConversion}
 import com.vandyapps.vandyvans.library.ArrayAdapterBuilder
 import com.vandyapps.vandyvans.models.Stop
 import com.vandyapps.vandyvans.services.{Global, VandyVansClient}

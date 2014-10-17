@@ -4,10 +4,11 @@ import android.app.Activity
 import android.os.{Handler, Message}
 import android.util.Log
 import android.widget.{Button, LinearLayout}
+import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
 import com.google.android.gms.maps.model._
 import com.google.android.gms.maps.{GoogleMap, MapView}
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.marsupial.eventhub.{ActorConversion}
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Route, Stop, Van}
 import com.vandyapps.vandyvans.services.Global

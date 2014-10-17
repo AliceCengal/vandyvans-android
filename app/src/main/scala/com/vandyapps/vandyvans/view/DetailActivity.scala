@@ -5,9 +5,9 @@ import android.content.{Context, Intent}
 import android.os.Bundle
 import android.view.View
 import android.widget._
+import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
 import com.marsupial.eventhub.Helpers.EasyActivity
-import com.marsupial.eventhub.AppInjection
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{ArrivalTime, Route, Stop}
 import com.vandyapps.vandyvans.services.Global

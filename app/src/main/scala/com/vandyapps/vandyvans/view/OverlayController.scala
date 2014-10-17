@@ -3,7 +3,8 @@ package com.vandyapps.vandyvans.view
 import android.app.Activity
 import android.os.{Handler, Message}
 import android.widget.{Button, ViewAnimator}
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.cengallut.appinjection.AppInjection
+import com.marsupial.eventhub.{ActorConversion}
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.services.Global
 
