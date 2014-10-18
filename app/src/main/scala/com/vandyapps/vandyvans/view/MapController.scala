@@ -31,7 +31,7 @@ trait MapController {
   def redBtn: Button
   def greenBtn: Button
 
-  val bridge = handler() {
+  private val bridge = handler() {
     /*
     case VanResults(vans) =>
       Log.i(Global.APP_LOG_ID, LOG_ID + " | Received Van location")
@@ -45,20 +45,19 @@ trait MapController {
           }
       }
 */
-    case "Init" =>
-      mapview.getMap.setOnInfoWindowClickListener(InfoWindowClick)
-      blueBtn.onClick(routeSelected(Route.BLUE))
-      redBtn.onClick(routeSelected(Route.RED))
-      greenBtn.onClick(routeSelected(Route.GREEN))
-      routeSelected(Route.BLUE)
-
     case StartLiveMap => startLiveMapping()
     case StopLiveMap => stopLiveMapping()
 
     case _ =>
   }
 
-  bridge.send("init")
+  bridge.postNow {
+    mapview.getMap.setOnInfoWindowClickListener(InfoWindowClick)
+    blueBtn.onClick(routeSelected(Route.BLUE))
+    redBtn.onClick(routeSelected(Route.RED))
+    greenBtn.onClick(routeSelected(Route.GREEN))
+    routeSelected(Route.BLUE)
+  }
 
   def startLiveMapping() {
     if (!isLiveMapping) {

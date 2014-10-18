@@ -1,22 +1,22 @@
 package com.vandyapps.vandyvans
 
 import android.app.Activity
-import android.os.{Message, Handler, Bundle}
+import android.os.Bundle
 import android.view.{MenuItem, Menu}
 import android.widget._
+import com.google.android.gms.maps.{MapsInitializer, MapView}
 import com.cengallut.appinjection.AppInjection
 import com.cengallut.asyncactivity.AsyncActivity
-import com.google.android.gms.maps.{MapsInitializer, MapView}
+import com.cengallut.handlerextension.MessageHub
 import com.vandyapps.vandyvans.services.Global
 import com.vandyapps.vandyvans.view._
 
 class Main extends Activity
-    with Handler.Callback
     with AppInjection[Global]
+    with AsyncActivity
     with MapController
     with OverlayController
     with StopsController
-    with AsyncActivity
 {
   override def mapview    = this.component[MapView](R.id.mapview)
   override def overlayBar = this.component[LinearLayout](R.id.linear1)
@@ -29,13 +29,9 @@ class Main extends Activity
   override def mapBtn   = this.component[Button](R.id.btn_map)
   override def stopList = this.component[ListView](R.id.listView1)
 
-  override def handleMessage(msg: Message): Boolean = {
-    msg.obj match {
-      case OverlayController.ListMode => stopLiveMapping()
-      case OverlayController.MapMode => startLiveMapping()
-      case _ =>
-    }
-    true
+  lazy val bridge = uiHandler {
+    case OverlayController.ListMode => stopLiveMapping()
+    case OverlayController.MapMode  => startLiveMapping()
   }
 
   override def onCreate(bundle: Bundle) {
@@ -48,13 +44,15 @@ class Main extends Activity
   override def onResume() {
     super.onResume()
     mapview.onResume()
-    (new Handler).postNow(startLiveMapping())
+    app.eventHub.send(MessageHub.Subscribe(bridge))
+    bridge.postNow(startLiveMapping())
   }
 
   override def onPause() {
     super.onPause()
     mapview.onPause()
     stopLiveMapping()
+    app.eventHub.send(MessageHub.Unsubscribe(bridge))
   }
 
   override def onDestroy() {
