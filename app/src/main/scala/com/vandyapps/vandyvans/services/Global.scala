@@ -1,21 +1,20 @@
 package com.vandyapps.vandyvans.services
 
-import java.io.{StringWriter, OutputStreamWriter}
-import java.net.URL
-import com.cengallut.handlerextension.MessageHub
-
+import java.io.StringWriter
 import scala.collection.JavaConversions._
+import scala.concurrent.ExecutionContext
+
 import android.content.{SharedPreferences, Context}
 import android.os.{AsyncTask, Handler, HandlerThread}
 import android.util.Log
+
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonWriter
 import com.parse.Parse
 
+import com.cengallut.handlerextension.MessageHub
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Stop, Route}
-
-import scala.concurrent.ExecutionContext
 
 class Global extends android.app.Application
                      with ReminderController
@@ -25,8 +24,8 @@ class Global extends android.app.Application
 
   private val servicesHolder = new VansClient
 
-  lazy val prefs   = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
-  lazy val cacheManager = new DataCache(prefs)
+  private lazy val prefs   = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
+  private lazy val cacheManager = new DataCache(prefs)
 
   def getColorFor(route: Route) = route match {
     case Route.BLUE => getResources.getColor(R.color.dusky_gray)
@@ -147,21 +146,6 @@ object Global {
   val DEFAULT_LATITUDE = 36.143905
   val APP_LOG_ID = "VandyVans"
   val APP_PREFERENCES = "VandyVansPreferences"
-
-  def get(url: String) = new URL(url).openStream()
-
-  def post(url: String, params: String) = {
-    val conn = new URL(url).openConnection()
-    conn.setDoInput(true)
-    conn.setDoOutput(true)
-    conn.setUseCaches(false)
-
-    val writer = new OutputStreamWriter(conn.getOutputStream)
-    writer.write(params)
-    writer.flush()
-
-    conn.getInputStream
-  }
 }
 
 private[services] class DataCache(prefs: SharedPreferences) {

@@ -1,7 +1,6 @@
 package com.vandyapps.vandyvans.view
 
 import android.app.Activity
-import android.os.{Handler, Message}
 import android.widget.{Button, ViewAnimator}
 import com.cengallut.appinjection.AppInjection
 import com.vandyapps.vandyvans.R
@@ -22,17 +21,6 @@ trait OverlayController {
   def mapBtn: Button
   def listBtn: Button
 
-  private implicit object handler extends Handler {
-    override def handleMessage(msg: Message): Unit = {
-      msg.obj match {
-        case "init" =>
-          mapBtn.onClick(gotoMap())
-          listBtn.onClick(gotoList())
-        case _ =>
-      }
-    }
-  }
-
   def gotoList() {
     pager.setInAnimation(self, R.anim.slide_in_top)
     pager.setOutAnimation(self, R.anim.slide_out_bottom)
@@ -47,7 +35,11 @@ trait OverlayController {
     app.eventHub.send(MapMode)
   }
 
-  handler.send("init")
+  uiHandler.postNow {
+    mapBtn.onClick(gotoMap())
+    listBtn.onClick(gotoList())
+  }
+
 }
 
 object OverlayController {

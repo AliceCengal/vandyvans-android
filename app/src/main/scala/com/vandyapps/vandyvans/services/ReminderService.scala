@@ -1,16 +1,12 @@
 package com.vandyapps.vandyvans.services
 
-import com.vandyapps.vandyvans.R
-
 import scala.ref.WeakReference
-
 import android.app.{Notification, NotificationManager, Service}
 import android.content.{Context, Intent}
 import android.os._
 import android.util.Log
-
+import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Stop, ArrivalTime}
-
 
 class ReminderService extends Service with Handler.Callback {
   import ReminderService._

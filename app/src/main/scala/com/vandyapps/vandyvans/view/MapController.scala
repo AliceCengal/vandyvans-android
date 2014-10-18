@@ -1,16 +1,15 @@
 package com.vandyapps.vandyvans.view
 
+import scala.util.Success
 import android.app.Activity
 import android.widget.{Button, LinearLayout}
-import com.cengallut.appinjection.AppInjection
-import com.cengallut.asyncactivity.AsyncActivity
 import com.google.android.gms.maps.model._
 import com.google.android.gms.maps.{GoogleMap, MapView}
+import com.cengallut.appinjection.AppInjection
+import com.cengallut.asyncactivity.AsyncActivity
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Route, Stop, Van}
 import com.vandyapps.vandyvans.services.Global
-
-import scala.util.Success
 
 /**
  * Define behavior for the MapView and the bar overlay.
