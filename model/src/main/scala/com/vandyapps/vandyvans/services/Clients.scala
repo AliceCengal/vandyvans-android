@@ -2,13 +2,13 @@ package com.vandyapps.vandyvans.services
 
 import java.io.Reader
 
-import scala.collection.JavaConversions._
-import scala.concurrent.{Future, ExecutionContext}
-import scala.util.Try
 import com.google.gson.JsonParser
-import com.parse.ParseObject
 import com.squareup.okhttp.{Request, OkHttpClient}
 import com.vandyapps.vandyvans.models._
+
+import scala.collection.JavaConversions._
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.Try
 
 trait VansServerCalls {
 
