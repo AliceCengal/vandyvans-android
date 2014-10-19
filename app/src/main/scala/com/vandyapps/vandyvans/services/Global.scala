@@ -2,7 +2,7 @@ package com.vandyapps.vandyvans.services
 
 import java.io.StringWriter
 import scala.collection.JavaConversions._
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{Future, ExecutionContext}
 
 import android.content.{SharedPreferences, Context}
 import android.os.{AsyncTask, Handler, HandlerThread}
@@ -12,31 +12,28 @@ import com.google.gson.JsonParser
 import com.google.gson.stream.JsonWriter
 import com.parse.Parse
 
-import com.cengallut.handlerextension.MessageHub
+import com.cengallut.handlerextension.{HandlerExtensionPackage, MessageHub}
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Stop, Route}
 
+import scala.util.Success
+
 class Global extends android.app.Application
-                     with ReminderController
+    with ReminderController
+    with HandlerExtensionPackage
 {
   private lazy val reminders = new SimpleReminderController(this)
-  private lazy val serviceThread = new HandlerThread("BackgroundThread")
+  //private lazy val serviceThread = new HandlerThread("BackgroundThread")
 
-  private val servicesHolder = new VansClient
+  private lazy val servicesHolder = new VansClient
+  lazy val eventHub = MessageHub.create
 
-  private lazy val prefs   = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
+  private lazy val prefs = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
   private lazy val cacheManager = new DataCache(prefs)
-
-  def getColorFor(route: Route) = route match {
-    case Route.BLUE => getResources.getColor(R.color.dusky_gray)
-    case Route.RED => getResources.getColor(R.color.red_argb)
-    case Route.GREEN => getResources.getColor(R.color.dark_gold)
-    case _ => getResources.getColor(android.R.color.black)
-  }
 
   override def onCreate() {
     super.onCreate()
-    serviceThread.start()
+    //serviceThread.start()
     reminders.start()
 
     Parse.initialize(this,
@@ -44,6 +41,13 @@ class Global extends android.app.Application
       "61wOewMMN0YISmX3UM79PGssnTsz1NfkOOMOsHMm")
 
     cacheInstatement()
+  }
+
+  def getColorFor(route: Route) = route match {
+    case Route.BLUE => getResources.getColor(R.color.dusky_gray)
+    case Route.RED => getResources.getColor(R.color.red_argb)
+    case Route.GREEN => getResources.getColor(R.color.dark_gold)
+    case _ => getResources.getColor(android.R.color.black)
   }
 
   def subscribeReminderForStop(stopdId: Int): Unit =
@@ -57,35 +61,52 @@ class Global extends android.app.Application
 
   def services: VansServerCalls = servicesHolder
 
-  lazy val eventHub = MessageHub.create
+  def preferences: SharedPreferences = prefs
 
   private def cacheInstatement(): Unit = {
+    val mainThread = new Handler
+
+    implicit val executionContext =
+      ExecutionContext.fromExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
+
     if (cacheManager.hasCache && !cacheManager.isCacheExpired) {
-      val data = new JsonParser().parse(cacheManager.retrieveCache).getAsJsonObject
+      val f = Future {
+        val data = new JsonParser().parse(cacheManager.retrieveCache).getAsJsonObject
 
-      Route.getAll.foreach { route =>
-        val stops = data.get(route.name + "Stop").getAsJsonArray
-          .toList
-          .map(j => Stop.fromJson(j.getAsJsonObject))
-        servicesHolder.allStops += route -> stops
+        Route.getAll.map { route =>
+          val stops = data.get(route.name + "Stop").getAsJsonArray
+            .toList
+            .map(j => Stop.fromJson(j.getAsJsonObject))
 
-        val points = data.get(route.name + "Points").getAsJsonArray
-          .toList
-          .map(ps => ps.getAsString.split(","))
-          .map(nums => (nums(0).toDouble, nums(1).toDouble))
-        servicesHolder.allWaypoints += route -> points
+          val points = data.get(route.name + "Points").getAsJsonArray
+            .toList
+            .map(ps => ps.getAsString.split(","))
+            .map(nums => (nums(0).toDouble, nums(1).toDouble))
+
+          (route, stops, points)
+        }
       }
 
+      f.onComplete {
+        case Success(result) =>
+          mainThread.postNow {
+            result.foreach {
+              case (r, ss, ps) =>
+                servicesHolder.allStops += r -> ss
+                servicesHolder.allWaypoints += r -> ps
+            }
+          }
+      }
+
+
+
     } else {
-      implicit val executionContext =
-        ExecutionContext.fromExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
       val redStops   = servicesHolder.stops(Route.RED)
       val greenStops = servicesHolder.stops(Route.GREEN)
       val blueStops  = servicesHolder.stops(Route.BLUE)
       val redPath    = servicesHolder.waypoints(Route.RED)
       val greenPath  = servicesHolder.waypoints(Route.GREEN)
       val bluePath   = servicesHolder.waypoints(Route.BLUE)
-      val handler    = new Handler()
 
       for (rs <- redStops;
            gs <- greenStops;
@@ -125,16 +146,14 @@ class Global extends android.app.Application
 
         jsonWriter.endObject()
 
-        handler.post(new Runnable() {
-          override def run(): Unit = {
-            Log.d(Global.APP_LOG_ID, "retrieved data from server")
-            servicesHolder.allStops =
-              Map(Route.RED -> rs, Route.GREEN -> gs, Route.BLUE -> bs)
-            servicesHolder.allWaypoints =
-              Map(Route.RED -> rp, Route.GREEN -> gp, Route.BLUE -> bp)
-            cacheManager.cacheData(string.toString)
-          }
-        })
+        mainThread.postNow {
+          Log.d(Global.APP_LOG_ID, "retrieved data from server")
+          servicesHolder.allStops =
+            Map(Route.RED -> rs, Route.GREEN -> gs, Route.BLUE -> bs)
+          servicesHolder.allWaypoints =
+            Map(Route.RED -> rp, Route.GREEN -> gp, Route.BLUE -> bp)
+          cacheManager.cacheData(string.toString)
+        }
       }
     }
   }
