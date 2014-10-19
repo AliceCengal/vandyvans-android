@@ -3,6 +3,7 @@ package com.vandyapps.vandyvans.services
 import java.io.Reader
 
 import com.google.gson.JsonParser
+import com.parse.ParseObject
 import com.squareup.okhttp.{Request, OkHttpClient}
 import com.vandyapps.vandyvans.models._
 
