@@ -85,15 +85,15 @@ trait MapController {
       mapview.getMap.clear()
 
       // Requesting data from the services.
-      app.services.waypoints(route).onCompleteForUi {
-        case Success(ws) =>
+      app.services.waypoints(route).onSuccessForUi {
+        case ws =>
           drawWaypoints(mapview.getMap, app.getColorFor(route), ws) }
 
-      app.services.stops(route).onCompleteForUi {
-        case Success(ss) => stopTracker.displayStops(ss) }
+      app.services.stops(route).onSuccessForUi {
+        case ss => stopTracker.displayStops(ss) }
 
-      app.services.vans(route).onCompleteForUi {
-        case Success(vs) => vanTracker.displayVans(vs) }
+      app.services.vans(route).onSuccessForUi {
+        case vs => vanTracker.displayVans(vs) }
 
     }
   }

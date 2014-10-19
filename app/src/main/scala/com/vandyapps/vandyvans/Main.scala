@@ -30,8 +30,12 @@ class Main extends Activity
   override def stopList = this.component[ListView](R.id.listView1)
 
   lazy val bridge = uiHandler {
-    case OverlayController.ListMode => stopLiveMapping()
-    case OverlayController.MapMode  => startLiveMapping()
+    case OverlayController.ListMode =>
+      stopLiveMapping()
+      app.preferences.edit().putInt("InitialScreen", 0).apply()
+    case OverlayController.MapMode  =>
+      startLiveMapping()
+      app.preferences.edit().putInt("InitialScreen", 1).apply()
   }
 
   override def onCreate(bundle: Bundle) {
@@ -68,14 +72,6 @@ class Main extends Activity
   override def onLowMemory() {
     super.onLowMemory()
     mapview.onLowMemory()
-  }
-
-  override def onBackPressed() {
-    if (pager.getDisplayedChild == 0) {
-      super.onBackPressed()
-    } else {
-      gotoMap()
-    }
   }
 
   override def onCreateOptionsMenu(menu: Menu) = {
