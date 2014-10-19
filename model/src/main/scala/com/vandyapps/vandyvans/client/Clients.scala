@@ -26,6 +26,9 @@ trait VansServerCalls {
   def waypoints(route: Route)
                (implicit exec: ExecutionContext): Future[List[(Double,Double)]]
 
+  def postReport(report: Report)
+                (implicit exec: ExecutionContext): Future[Unit]
+
 }
 
 object VansServerCalls {
@@ -117,6 +120,11 @@ private[client] class VansClient extends VansServerCalls {
         route = r,
         minutes = arrivalResultObject.get("Minutes").getAsInt)
     }
+
+
+  override def postReport(report: Report)
+                         (implicit exec: ExecutionContext): Future[Unit] =
+    Future {}
 
   def fetchAsStream(url: String): Reader =
     client.newCall(request.url(url).build()).execute().body().charStream()

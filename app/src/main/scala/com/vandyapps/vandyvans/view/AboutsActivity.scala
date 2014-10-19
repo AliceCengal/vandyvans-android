@@ -50,7 +50,7 @@ class AboutsActivity extends Activity
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     if (resultCode != Activity.RESULT_CANCELED) {
-      app.postReport(
+      app.services.postReport(
         new Report(
           isBugReport = data.getIntExtra(TAG_FORMTYPE, TAG_FEED) == TAG_BUG,
           senderAddress = data.getStringExtra(FormActivity.RESULT_EMAIL),

@@ -3,6 +3,7 @@ package com.vandyapps.vandyvans.services
 import java.io.StringWriter
 import scala.collection.JavaConversions._
 import scala.concurrent.{Future, ExecutionContext}
+import scala.util.Success
 
 import android.content.{SharedPreferences, Context}
 import android.os.{AsyncTask, Handler}
@@ -17,8 +18,6 @@ import com.vandyapps.vandyvans.client.VansServerCalls
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models._
 
-import scala.util.Success
-
 class Global extends android.app.Application
     with ReminderController
     with HandlerExtensionPackage
@@ -29,14 +28,13 @@ class Global extends android.app.Application
 
   private lazy val prefs = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
   private lazy val cacheManager = new DataCache(prefs)
-  private lazy val parseClient = new ParseClient
+
 
   private implicit val executionContext =
     ExecutionContext.fromExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
 
   override def onCreate() {
     super.onCreate()
-    //serviceThread.start()
     reminders.start()
 
     Parse.initialize(this,
@@ -65,12 +63,6 @@ class Global extends android.app.Application
   def services: VansServerCalls = servicesHolder
 
   def preferences: SharedPreferences = prefs
-
-  def postReport(report: Report)
-                (implicit exec: ExecutionContext): Future[Unit] =
-    Future {
-      parseClient.postReportUsingParseApi(report)
-    }
 
   private def cacheInstatement(): Unit = {
     val mainThread = new Handler
@@ -227,6 +219,7 @@ private[services] object ParseClient {
 private[services] class CachedServerCalls extends VansServerCalls {
 
   val client       = VansServerCalls.create
+  val parseClient  = new ParseClient
   val mainThread   = uiHandler
   var allStops     = Map.empty[Route, List[Stop]]
   var allWaypoints = Map.empty[Route, List[(Double,Double)]]
@@ -273,4 +266,9 @@ private[services] class CachedServerCalls extends VansServerCalls {
                                 (implicit exec: ExecutionContext): Future[List[Stop]] =
     Future { allStops.values.flatten.toList }
 
+  override def postReport(report: Report)
+                         (implicit exec: ExecutionContext): Future[Unit] =
+    Future {
+      parseClient.postReportUsingParseApi(report)
+    }
 }
