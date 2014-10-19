@@ -5,7 +5,7 @@ import scala.collection.JavaConversions._
 import scala.concurrent.{Future, ExecutionContext}
 
 import android.content.{SharedPreferences, Context}
-import android.os.{AsyncTask, Handler, HandlerThread}
+import android.os.{AsyncTask, Handler}
 import android.util.Log
 
 import com.google.gson.JsonParser
@@ -13,9 +13,9 @@ import com.google.gson.stream.JsonWriter
 import com.parse.{ParseObject, Parse}
 
 import com.cengallut.handlerextension.{HandlerExtensionPackage, MessageHub}
-import com.vandyapps.vandyvans.client.{VansClient, VansServerCalls}
+import com.vandyapps.vandyvans.client.VansServerCalls
 import com.vandyapps.vandyvans.R
-import com.vandyapps.vandyvans.models.{Report, Stop, Route}
+import com.vandyapps.vandyvans.models._
 
 import scala.util.Success
 
@@ -24,16 +24,14 @@ class Global extends android.app.Application
     with HandlerExtensionPackage
 {
   private lazy val reminders = new SimpleReminderController(this)
-  //private lazy val serviceThread = new HandlerThread("BackgroundThread")
-
-  private lazy val servicesHolder = VansServerCalls.create.asInstanceOf[VansClient]
+  private lazy val servicesHolder = new CachedServerCalls
   lazy val eventHub = MessageHub.create
 
   private lazy val prefs = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
   private lazy val cacheManager = new DataCache(prefs)
   private lazy val parseClient = new ParseClient
 
-  implicit val executionContext =
+  private implicit val executionContext =
     ExecutionContext.fromExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
 
   override def onCreate() {
@@ -224,4 +222,55 @@ private[services] object ParseClient {
   private val REPORT_BODY      = "body"
   private val REPORT_ISBUG     = "isBugReport"
   private val REPORT_NOTIFY    = "notifyWhenResolved"
+}
+
+private[services] class CachedServerCalls extends VansServerCalls {
+
+  val client       = VansServerCalls.create
+  val mainThread   = uiHandler
+  var allStops     = Map.empty[Route, List[Stop]]
+  var allWaypoints = Map.empty[Route, List[(Double,Double)]]
+
+  override def vans(route: Route)
+                   (implicit exec: ExecutionContext): Future[List[Van]] =
+    client.vans(route)
+
+  override def stops(route: Route)
+                    (implicit exec: ExecutionContext): Future[List[Stop]] =
+    allStops.get(route).map(Future(_))
+      .getOrElse({
+      client.stops(route).andThen { case Success(ss) =>
+        mainThread.postNow {
+          allStops += (route -> ss)
+        }
+      }
+    })
+
+  override def stopsWithId(id: Int)
+                          (implicit exec: ExecutionContext): Future[Stop] =
+    Future {
+      allStops.valuesIterator.flatten
+        .find(_.id == id)
+        .getOrElse(Stop(0, ""))
+    }
+
+  override def waypoints(route: Route)
+                        (implicit exec: ExecutionContext): Future[List[(Double, Double)]] =
+    allWaypoints.get(route).map(Future(_))
+      .getOrElse({
+      client.waypoints(route).andThen { case Success(ws) =>
+        mainThread.postNow {
+          allWaypoints += (route -> ws)
+        }
+      }
+    })
+
+  override def arrivalTimes(stop: Stop)
+                           (implicit exec: ExecutionContext): Future[List[ArrivalTime]] =
+    client.arrivalTimes(stop)
+
+  override def stopsForAllRoutes()
+                                (implicit exec: ExecutionContext): Future[List[Stop]] =
+    Future { allStops.values.flatten.toList }
+
 }

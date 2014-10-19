@@ -1,14 +1,11 @@
 package com.vandyapps.vandyvans.client
 
 import java.io.Reader
-
+import scala.collection.JavaConversions._
+import scala.concurrent.{ExecutionContext, Future}
 import com.google.gson.JsonParser
 import com.squareup.okhttp.{Request, OkHttpClient}
 import com.vandyapps.vandyvans.models._
-
-import scala.collection.JavaConversions._
-import scala.concurrent.{ExecutionContext, Future}
-import scala.util.Try
 
 trait VansServerCalls {
 
@@ -29,8 +26,6 @@ trait VansServerCalls {
   def waypoints(route: Route)
                (implicit exec: ExecutionContext): Future[List[(Double,Double)]]
 
-
-
 }
 
 object VansServerCalls {
@@ -39,13 +34,12 @@ object VansServerCalls {
 
 }
 
-class VansClient extends VansServerCalls {
+private[client] class VansClient extends VansServerCalls {
 
   lazy val client  = new OkHttpClient
   lazy val parser  = new JsonParser
   lazy val request = new Request.Builder
-  var allStops     = Map.empty[Route, List[Stop]]
-  var allWaypoints = Map.empty[Route, List[(Double,Double)]]
+
 
   override def vans(route: Route)
                    (implicit exec: ExecutionContext): Future[List[Van]] =
@@ -63,64 +57,65 @@ class VansClient extends VansServerCalls {
   override def stops(route: Route)
                     (implicit exec: ExecutionContext): Future[List[Stop]] =
     Future {
-      allStops.getOrElse(route, {
-        val stream =
-          fetchAsStream(VansClient.stopsFetchUrl(route))
-        val stopsResult =
-          parser.parse(stream).getAsJsonArray.toList
-            .map(elem => Stop.fromJson(elem.getAsJsonObject))
-        allStops += (route -> stopsResult)
-        stream.close()
-        stopsResult
-      })
+      val stream =
+        fetchAsStream(VansClient.stopsFetchUrl(route))
+      val stopsResult =
+        parser.parse(stream).getAsJsonArray.toList
+          .map(elem => Stop.fromJson(elem.getAsJsonObject))
+      stream.close()
+      stopsResult
     }
 
   override def stopsForAllRoutes()(implicit exec: ExecutionContext): Future[List[Stop]] =
     Future {
-      allStops.values.flatten.toList
+      List.empty[Stop]
     }
 
   override def stopsWithId(id: Int)
                           (implicit exec: ExecutionContext): Future[Stop] =
     Future {
-      allStops.values.flatten.find(_.id == id).get
+      Stop(0, "No Stop")
     }
 
   override def waypoints(route: Route)
                         (implicit exec: ExecutionContext): Future[List[(Double, Double)]] =
     Future {
-      allWaypoints.getOrElse(route, {
-        val stream =
-          fetchAsStream(VansClient.waypointsFetchUrl(route))
-        val pointsResult =
-          parser.parse(stream).getAsJsonArray.get(0).getAsJsonArray.toList
-            .map(_.getAsJsonObject)
-            .map(FloatPair.asPair _ compose FloatPair.fromJson)
-        allWaypoints += (route -> pointsResult)
-        stream.close()
-        pointsResult
-      })
+      val stream =
+        fetchAsStream(VansClient.waypointsFetchUrl(route))
+      val pointsResult =
+        parser.parse(stream).getAsJsonArray.get(0).getAsJsonArray.toList
+          .map(_.getAsJsonObject)
+          .map(FloatPair.asPair _ compose FloatPair.fromJson)
+      stream.close()
+      pointsResult
     }
 
   override def arrivalTimes(stop: Stop)
                            (implicit exec: ExecutionContext): Future[List[ArrivalTime]] =
-    Future {
-      Route.getAll
-        .map { r =>
-          Try {
-            val stream =
-              fetchAsStream(VansClient.arrivalFetchUrl(stop, r))
-            val arrivalResultObject =
-              parser.parse(stream).getAsJsonObject
-                .get("Predictions").getAsJsonArray
-                .get(0).getAsJsonObject
+    Future(Route.getAll).flatMap { routes =>
+      val fs = routes.map(arrivalTime(stop, _))
+      fs.foldLeft(Future(List.empty[ArrivalTime])) {
+        (fats, fat) =>
+          for {
+            ats <- fats
+            at <- fat
+          } yield at :: ats
+      }
+    }
 
-            ArrivalTime(
-              stop = stop,
-              route = r,
-              minutes = arrivalResultObject.get("Minutes").getAsInt)
-          }.toOption }
-        .flatten
+  def arrivalTime(stop: Stop, r: Route)(implicit exec: ExecutionContext): Future[ArrivalTime] =
+    Future {
+      val stream =
+        fetchAsStream(VansClient.arrivalFetchUrl(stop, r))
+      val arrivalResultObject =
+        parser.parse(stream).getAsJsonObject
+          .get("Predictions").getAsJsonArray
+          .get(0).getAsJsonObject
+
+      ArrivalTime(
+        stop = stop,
+        route = r,
+        minutes = arrivalResultObject.get("Minutes").getAsInt)
     }
 
   def fetchAsStream(url: String): Reader =
@@ -128,14 +123,12 @@ class VansClient extends VansServerCalls {
 
 }
 
-object VansClient {
+private[client] object VansClient {
 
   private val SYN_BASE_URL = "http://api.syncromatics.com"
   private val SYN_API_KEY = "?api_key=a922a34dfb5e63ba549adbb259518909"
 
   private val VV_BASE_URL   = "http://vandyvans.com"
-
-
 
   private val ROUTE_CACHE_DATE       = "VandyVansClientRouteCacheDate"
   private val ROUTE_DATA             = "VandyVansClientRouteData"
