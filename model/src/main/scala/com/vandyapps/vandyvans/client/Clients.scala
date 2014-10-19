@@ -1,9 +1,8 @@
-package com.vandyapps.vandyvans.services
+package com.vandyapps.vandyvans.client
 
 import java.io.Reader
 
 import com.google.gson.JsonParser
-import com.parse.ParseObject
 import com.squareup.okhttp.{Request, OkHttpClient}
 import com.vandyapps.vandyvans.models._
 
@@ -30,12 +29,17 @@ trait VansServerCalls {
   def waypoints(route: Route)
                (implicit exec: ExecutionContext): Future[List[(Double,Double)]]
 
-  def postReport(report: Report)
-                (implicit exec: ExecutionContext): Future[Unit]
+
 
 }
 
-private[services] class VansClient extends VansServerCalls {
+object VansServerCalls {
+
+  def create: VansServerCalls = new VansClient
+
+}
+
+class VansClient extends VansServerCalls {
 
   lazy val client  = new OkHttpClient
   lazy val parser  = new JsonParser
@@ -119,29 +123,19 @@ private[services] class VansClient extends VansServerCalls {
         .flatten
     }
 
-  override def postReport(report: Report)
-                         (implicit exec: ExecutionContext): Future[Unit] =
-    Future {
-      VansClient.postReportUsingParseApi(report)
-    }
-
   def fetchAsStream(url: String): Reader =
     client.newCall(request.url(url).build()).execute().body().charStream()
 
 }
 
-private[services] object VansClient {
+object VansClient {
 
   private val SYN_BASE_URL = "http://api.syncromatics.com"
   private val SYN_API_KEY = "?api_key=a922a34dfb5e63ba549adbb259518909"
 
   private val VV_BASE_URL   = "http://vandyvans.com"
 
-  private val REPORT_CLASSNAME = "VVReport"
-  private val REPORT_USEREMAIL = "userEmail"
-  private val REPORT_BODY      = "body"
-  private val REPORT_ISBUG     = "isBugReport"
-  private val REPORT_NOTIFY    = "notifyWhenResolved"
+
 
   private val ROUTE_CACHE_DATE       = "VandyVansClientRouteCacheDate"
   private val ROUTE_DATA             = "VandyVansClientRouteData"
@@ -160,15 +154,6 @@ private[services] object VansClient {
 
   def waypointsFetchUrl(route: Route) =
     s"$VV_BASE_URL/Route/${route.waypointId}/Waypoints"
-
-  private def postReportUsingParseApi(report: Report) {
-    val reportObj = new ParseObject(REPORT_CLASSNAME)
-    reportObj.put(REPORT_USEREMAIL, report.senderAddress)
-    reportObj.put(REPORT_BODY     , report.bodyOfReport)
-    reportObj.put(REPORT_ISBUG    , report.isBugReport)
-    reportObj.put(REPORT_NOTIFY   , report.notifyWhenResolved)
-    reportObj.save()
-  }
 
 }
 

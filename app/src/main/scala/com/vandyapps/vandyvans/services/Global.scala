@@ -10,11 +10,12 @@ import android.util.Log
 
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonWriter
-import com.parse.Parse
+import com.parse.{ParseObject, Parse}
 
 import com.cengallut.handlerextension.{HandlerExtensionPackage, MessageHub}
+import com.vandyapps.vandyvans.client.{VansClient, VansServerCalls}
 import com.vandyapps.vandyvans.R
-import com.vandyapps.vandyvans.models.{Stop, Route}
+import com.vandyapps.vandyvans.models.{Report, Stop, Route}
 
 import scala.util.Success
 
@@ -25,11 +26,15 @@ class Global extends android.app.Application
   private lazy val reminders = new SimpleReminderController(this)
   //private lazy val serviceThread = new HandlerThread("BackgroundThread")
 
-  private lazy val servicesHolder = new VansClient
+  private lazy val servicesHolder = VansServerCalls.create.asInstanceOf[VansClient]
   lazy val eventHub = MessageHub.create
 
   private lazy val prefs = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
   private lazy val cacheManager = new DataCache(prefs)
+  private lazy val parseClient = new ParseClient
+
+  implicit val executionContext =
+    ExecutionContext.fromExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
 
   override def onCreate() {
     super.onCreate()
@@ -63,11 +68,14 @@ class Global extends android.app.Application
 
   def preferences: SharedPreferences = prefs
 
+  def postReport(report: Report)
+                (implicit exec: ExecutionContext): Future[Unit] =
+    Future {
+      parseClient.postReportUsingParseApi(report)
+    }
+
   private def cacheInstatement(): Unit = {
     val mainThread = new Handler
-
-    implicit val executionContext =
-      ExecutionContext.fromExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
 
     if (cacheManager.hasCache && !cacheManager.isCacheExpired) {
       val f = Future {
@@ -97,8 +105,6 @@ class Global extends android.app.Application
             }
           }
       }
-
-
 
     } else {
       val redStops   = servicesHolder.stops(Route.RED)
@@ -196,4 +202,26 @@ private[services] class DataCache(prefs: SharedPreferences) {
 
 private[services] class UserSettings(prefs: SharedPreferences) {
 
+}
+
+private[services] class ParseClient {
+  import ParseClient._
+
+  def postReportUsingParseApi(report: Report) {
+    val reportObj = new ParseObject(REPORT_CLASSNAME)
+    reportObj.put(REPORT_USEREMAIL, report.senderAddress)
+    reportObj.put(REPORT_BODY     , report.bodyOfReport)
+    reportObj.put(REPORT_ISBUG    , report.isBugReport)
+    reportObj.put(REPORT_NOTIFY   , report.notifyWhenResolved)
+    reportObj.save()
+  }
+
+}
+
+private[services] object ParseClient {
+  private val REPORT_CLASSNAME = "VVReport"
+  private val REPORT_USEREMAIL = "userEmail"
+  private val REPORT_BODY      = "body"
+  private val REPORT_ISBUG     = "isBugReport"
+  private val REPORT_NOTIFY    = "notifyWhenResolved"
 }
