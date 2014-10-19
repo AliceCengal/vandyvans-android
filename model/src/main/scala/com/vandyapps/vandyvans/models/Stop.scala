@@ -1,11 +1,28 @@
 package com.vandyapps.vandyvans.models
 
+import com.google.gson.JsonObject
+import com.google.gson.stream.JsonWriter
+
 case class Stop(id: Int,
                 name: String,
                 image: String = "",
                 latitude: Double = 0.0,
                 longitude: Double = 0.0,
                 rtpi: Int = -1)
+{
+  import Stop._
+
+  def writeJson(writer: JsonWriter): Unit = {
+    writer.beginObject()
+      .name(TAG_ID).value(id)
+      .name(TAG_IMAGE).value(image)
+      .name(TAG_LAT).value(latitude)
+      .name(TAG_LON).value(longitude)
+      .name(TAG_NAME).value(name)
+      .name(TAG_RTPI).value(rtpi)
+      .endObject()
+  }
+}
 
 object Stop {
   val TAG_ID    = "ID"
@@ -37,5 +54,15 @@ object Stop {
       Stop(264101, "McGugin Center"),
       Stop(401204, "Blakemore House"),
       Stop(446923, "Medical Center"))
+
+  def fromJson(jsonObj: JsonObject) =
+    Stop(
+      id = jsonObj.get(Stop.TAG_ID).getAsInt,
+      name = jsonObj.get(Stop.TAG_NAME).getAsString,
+      image = jsonObj.get(Stop.TAG_IMAGE).getAsString,
+      latitude = jsonObj.get(Stop.TAG_LAT).getAsDouble,
+      longitude = jsonObj.get(Stop.TAG_LON).getAsDouble)
+
+
 
 }

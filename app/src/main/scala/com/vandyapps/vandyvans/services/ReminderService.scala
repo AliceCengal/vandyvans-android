@@ -1,24 +1,18 @@
 package com.vandyapps.vandyvans.services
 
-import com.vandyapps.vandyvans.R
-
 import scala.ref.WeakReference
-
 import android.app.{Notification, NotificationManager, Service}
 import android.content.{Context, Intent}
 import android.os._
 import android.util.Log
-
-import com.marsupial.eventhub.ActorConversion
+import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Stop, ArrivalTime}
-import SyncromaticsClient._
-
 
 class ReminderService extends Service with Handler.Callback {
   import ReminderService._
 
   lazy val workerThread = new HandlerThread("reminderThread")
-  lazy val syncroHandler = new Handler(workerThread.getLooper, new SyncromaticsClient)
+  lazy val syncroHandler = new Handler(workerThread.getLooper) //, new SyncromaticsClient)
   lazy val clientHandler = new Messenger(new Handler(this))
   lazy val trackerHandler = new Handler(this)
 
@@ -115,7 +109,7 @@ object ReminderService {
   class StopTracker(val id: Int,
                     val parent: Handler,
                     val syncro: Handler)
-    extends Handler with ActorConversion
+    extends Handler
   {
     var isTracking = true
     var latestArrivalTime = Option.empty[ArrivalTime]
@@ -125,7 +119,7 @@ object ReminderService {
       if (msg.what == INIT) {
         logMessage(s"Initing for stopId: $id")
         isTracking = true
-        Stop.forId(id).foreach { stop => syncro ? FetchArrivalTimes(stop) }
+        //Stop.forId(id).foreach { stop => syncro ? FetchArrivalTimes(stop) }
 
 
       } else if (msg.what == NOTIFY_PARENT) {
@@ -135,9 +129,9 @@ object ReminderService {
         }
 
       } else {
-        msg.obj match { case o: ArrivalTimeResults =>
-          handleArrivalTimes(o.times)
-        }
+        //msg.obj match { case o: ArrivalTimeResults =>
+        //  handleArrivalTimes(o.times)
+        //}
 
       }
     }

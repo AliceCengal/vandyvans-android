@@ -1,5 +1,6 @@
 package com.vandyapps.vandyvans.library
 
+import android.app.Activity
 import android.view.View
 import android.view.View.OnClickListener
 
@@ -18,5 +19,19 @@ trait AndroidImplicit {
   }
 
   implicit def funToRunnable(fun: () => Unit) = new Runnable() { def run() = fun() }
+
+  implicit class ControlAddon[T](target: T) {
+
+    def forward[U](func: T=>U): U = func(target)
+
+    def returnAfter(proc: =>Unit): T = { proc; target }
+
+  }
+
+  implicit class ViewAccess(a: Activity) {
+
+    def component[V](id: Int): V = a.findViewById(id).asInstanceOf[V]
+
+  }
 
 }

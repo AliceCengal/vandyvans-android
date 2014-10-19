@@ -1,33 +1,32 @@
 package com.vandyapps.vandyvans.view
 
-import android.app.Activity
-import android.os.{Handler, Message}
+import android.os.Handler
+
+import scala.util.Success
 import android.util.Log
+import android.app.Activity
 import android.widget.{Button, LinearLayout}
 import com.google.android.gms.maps.model._
 import com.google.android.gms.maps.{GoogleMap, MapView}
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.cengallut.handlerextension.HandlerExt
+import com.cengallut.appinjection.AppInjection
+import com.cengallut.asyncactivity.AsyncActivity
 import com.vandyapps.vandyvans.R
-import com.vandyapps.vandyvans.models.{FloatPair, Route, Stop, Van}
+import com.vandyapps.vandyvans.models.{Route, Stop, Van}
 import com.vandyapps.vandyvans.services.Global
 
 /**
  * Define behavior for the MapView and the bar overlay.
  */
-trait MapController extends ActorConversion {
-  self: Activity with AppInjection[Global] =>
+trait MapController {
+  self: Activity with AppInjection[Global] with AsyncActivity =>
 
-  import com.vandyapps.vandyvans.services.VandyVansClient._
-  import com.vandyapps.vandyvans.services.SyncromaticsClient._
-  import com.vandyapps.vandyvans.view.MapController._
+  import MapController._
 
   private var currentRoute: Route = null
-  private var markerDict = Map.empty[Marker, Stop]
   private var isLiveMapping = false
-
-  private var waypointsData = List.empty[FloatPair]
-  private var stopsData = List.empty[Stop]
-  private var vansData = List.empty[Van]
+  private lazy val vanTracker = new VanTracker(mapview.getMap)
+  private lazy val stopTracker = new StopTracker(mapview.getMap, this)
 
   def mapview: MapView
   def overlayBar: LinearLayout
@@ -35,48 +34,41 @@ trait MapController extends ActorConversion {
   def redBtn: Button
   def greenBtn: Button
 
-  private implicit object bridge extends Handler {
-    override def handleMessage(msg: Message): Unit = msg.obj match {
-      case WaypointResults(waypoints) =>
-        waypointsData = waypoints
-        draw()
-
-      case StopResults(stops) =>
-        stopsData = stops
-        draw()
-
-      case VanResults(vans) =>
-        Log.i(Global.APP_LOG_ID, LOG_ID + " | Received Van location")
-        vansData = vans
-        draw()
-
-        bridge.postDelayed(() =>
-          if (isLiveMapping)
-            app.syncromatics ? FetchVans(currentRoute) ,
-          5000)
-
-      case "Init" =>
-        mapview.getMap.setOnInfoWindowClickListener(InfoWindowClick)
-        blueBtn.onClick(routeSelected(Route.BLUE))
-        redBtn.onClick(routeSelected(Route.RED))
-        greenBtn.onClick(routeSelected(Route.GREEN))
-        routeSelected(Route.BLUE)
-        //app.eventHub ? EventHub.Subscribe
-
-      case StartLiveMap => startLiveMapping()
-      case StopLiveMap => stopLiveMapping()
-
-      case _ =>
-    }
+  private val bridge = uiHandler {
+    case StartLiveMap => startLiveMapping()
+    case StopLiveMap => stopLiveMapping()
+    case "tock" =>
+      if (isLiveMapping) {
+        app.services.vans(currentRoute).onCompleteForUi {
+          case Success(vs) => vanTracker.displayVans(vs) }
+      }
   }
 
-  bridge ! "Init"
+  bridge.postNow {
+    mapview.getMap.setOnInfoWindowClickListener(stopTracker)
+    blueBtn.onClick(routeSelected(Route.BLUE))
+    redBtn.onClick(routeSelected(Route.RED))
+    greenBtn.onClick(routeSelected(Route.GREEN))
+    routeSelected(Route.BLUE)
+  }
+
+  private val interval = 5000
+
+  private val tick = uiHandler {
+    case h: HandlerExt => h.sendDelayed(interval, h)
+  }
+
+  private val tock: Handler with HandlerExt = uiHandler {
+    case h: HandlerExt =>
+      Log.i(Global.APP_LOG_ID, "Received Tick")
+      bridge.send("tock")
+      tick.send(h)
+  }
+
+  tick.send(tock) // ha ha ha
 
   def startLiveMapping() {
-    if (!isLiveMapping) {
-      isLiveMapping = true
-      app.syncromatics ? FetchVans(currentRoute)
-    }
+    isLiveMapping = true
   }
 
   def stopLiveMapping() {
@@ -86,98 +78,39 @@ trait MapController extends ActorConversion {
   def routeSelected(route: Route) {
     if (currentRoute != route) {
       currentRoute = route
-      overlayBar.setBackgroundColor(app.getColorFor(currentRoute))
+      overlayBar.setBackgroundColor(app.getColorFor(route))
+
+      vanTracker.purgeMarkers()
+      stopTracker.purgeMarkers()
+      mapview.getMap.clear()
 
       // Requesting data from the services.
-      app.vandyVans ? FetchWaypoints(route)
-      app.vandyVans ? FetchStops(route)
-      app.syncromatics ? FetchVans(route)
+      app.services.waypoints(route).onSuccessForUi {
+        case ws =>
+          drawWaypoints(mapview.getMap, app.getColorFor(route), ws) }
+
+      app.services.stops(route).onSuccessForUi {
+        case ss => stopTracker.displayStops(ss) }
+
+      app.services.vans(route).onSuccessForUi {
+        case vs => vanTracker.displayVans(vs) }
+
     }
   }
 
-  def handleWaypointResult(waypoints: Seq[FloatPair]) {
-    val options = new PolylineOptions()
-      .color(app.getColorFor(currentRoute))
-      .width(DEFAULT_WIDTH)
-    for (way <- waypoints) {
-      options.add(new LatLng(way.lat, way.lon))
-    }
-    options.add(new LatLng(waypoints.head.lat, waypoints.head.lon))
-    mapview.getMap.addPolyline(options)
-    Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Waypoints")
-  }
-
-  def handleStopResults(stops: Seq[Stop]) {
-    for (map <- Option(mapview.getMap);
-         stop <- stops) {
-      val option =
-        new MarkerOptions()
-          .position(new LatLng(stop.latitude, stop.longitude))
-          .title(stop.name)
-          .draggable(false)
-      markerDict += ((map.addMarker(option), stop))
-    }
-    Log.i(Global.APP_LOG_ID, s"$LOG_ID | Handled Stops")
-  }
-
-  def handleVanResults(vans: Seq[Van]) {
-    for (map <- Option(mapview.getMap);
-         van <- vans) {
-      map.addMarker(new MarkerOptions()
-        .position(new LatLng(van.location.lat, van.location.lon))
-        .title(s"${van.name}: ${van.percentFull}% full")
-        .draggable(false)
-        .flat(true)
-        .icon(BitmapDescriptorFactory.fromResource(R.drawable.van_icon))
-        .anchor(0.5f, 0.5f))
-    }
-  }
-
-  private def draw() {
-    for (map <- Option(mapview.getMap)) {
-      map.clear()
-      
-      // Draw waypoints
-      if (waypointsData.nonEmpty) {
-        val options = new PolylineOptions()
-          .color(app.getColorFor(currentRoute))
-          .width(DEFAULT_WIDTH)
-        for (way <- waypointsData) {
-          options.add(new LatLng(way.lat, way.lon))
-        }
-        options.add(new LatLng(waypointsData.head.lat, waypointsData.head.lon))
-        map.addPolyline(options)
+  def drawWaypoints(map: GoogleMap,
+                    color: Int,
+                    waypoints: Seq[(Double,Double)]): Unit =
+  {
+    if (waypoints.nonEmpty) {
+      val options = new PolylineOptions()
+        .color(color)
+        .width(DEFAULT_WIDTH)
+      for (way <- waypoints) {
+        options.add(new LatLng(way._1, way._2))
       }
-
-      // Draw stops
-      for (s <- stopsData) {
-        val option =
-          new MarkerOptions()
-            .position(new LatLng(s.latitude, s.longitude))
-            .title(s.name)
-            .draggable(false)
-        markerDict += ((map.addMarker(option), s))
-      }
-
-      // Draw Vans
-      for (van <- vansData) {
-        map.addMarker(new MarkerOptions()
-          .position(new LatLng(van.location.lat, van.location.lon))
-          .title(s"${van.name}: ${van.percentFull}% full")
-          .draggable(false)
-          .flat(true)
-          .icon(BitmapDescriptorFactory.fromResource(R.drawable.van_icon))
-          .anchor(0.5f, 0.5f))
-      }
-
-    }
-  }
-
-  private object InfoWindowClick extends GoogleMap.OnInfoWindowClickListener {
-    override def onInfoWindowClick(marker: Marker): Unit = {
-      markerDict.get(marker).foreach {
-        s => DetailActivity.openForId(s.id, self)
-      }
+      options.add(new LatLng(waypoints.head._1, waypoints.head._2))
+      map.addPolyline(options)
     }
   }
 
@@ -191,5 +124,88 @@ object MapController {
 
   case object StartLiveMap
   case object StopLiveMap
+
+  class VanTracker(private val map: GoogleMap) {
+
+    private var markers = List.empty[Marker]
+
+    def purgeMarkers(): Unit = {
+      markers = List.empty
+    }
+
+    def displayVans(vans: Seq[Van]): Unit = {
+      if (vans.length > markers.length) {
+        val extra = vans.length - markers.length
+        (1 to extra).foreach { _ =>
+          val option =
+            new MarkerOptions()
+              .position(new LatLng(Global.DEFAULT_LATITUDE, Global.DEFAULT_LONGITUDE))
+              .draggable(false)
+              .flat(true)
+              .icon(BitmapDescriptorFactory.fromResource(R.drawable.van_icon))
+              .anchor(0.5f, 0.5f)
+          markers ::= map.addMarker(option)
+        }
+      }
+
+      for (i <- 0 until markers.length) {
+        if (i < vans.length) {
+          val m = markers(i)
+          val v = vans(i)
+          m.setVisible(true)
+          m.setPosition(new LatLng(v.location.lat, v.location.lon))
+          m.setTitle(s"${v.name}: ${v.percentFull}% full")
+
+        } else {
+          markers(i).setVisible(false)
+        }
+      }
+    }
+
+  }
+
+  class StopTracker(private val map: GoogleMap, private val ctx: Activity)
+      extends GoogleMap.OnInfoWindowClickListener {
+
+    private var markers = List.empty[Marker]
+    private var mStops = Seq.empty[Stop]
+
+    override def onInfoWindowClick(m: Marker): Unit = {
+      mStops.find(_.name == m.getTitle)
+        .foreach { s => DetailActivity.openForId(s.id, ctx) }
+    }
+
+    def purgeMarkers(): Unit = {
+      markers = List.empty
+    }
+
+    def displayStops(stops: Seq[Stop]): Unit = {
+      this.mStops = stops
+      if (stops.length > markers.length) {
+        val extra = stops.length - markers.length
+        (1 to extra).foreach { _ =>
+          val option =
+            new MarkerOptions()
+              .position(new LatLng(Global.DEFAULT_LATITUDE, Global.DEFAULT_LONGITUDE))
+              .draggable(false)
+          markers ::= map.addMarker(option)
+        }
+      }
+
+      for (i <- 0 until markers.length) {
+        if (i < stops.length) {
+          val m = markers(i)
+          val s = stops(i)
+          m.setVisible(true)
+          m.setPosition(new LatLng(s.latitude, s.longitude))
+          m.setTitle(s.name)
+
+        } else {
+          markers(i).setVisible(false)
+        }
+      }
+    }
+
+  }
 
 }

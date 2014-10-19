@@ -1,9 +1,8 @@
 package com.vandyapps.vandyvans.view
 
 import android.app.Activity
-import android.os.{Handler, Message}
 import android.widget.{Button, ViewAnimator}
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.cengallut.appinjection.AppInjection
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.services.Global
 
@@ -13,7 +12,7 @@ import com.vandyapps.vandyvans.services.Global
  *
  * Created by athran on 8/22/14.
  */
-trait OverlayController extends ActorConversion {
+trait OverlayController {
   self: Activity with AppInjection[Global] =>
 
   import OverlayController._
@@ -22,32 +21,25 @@ trait OverlayController extends ActorConversion {
   def mapBtn: Button
   def listBtn: Button
 
-  private implicit object handler extends Handler {
-    override def handleMessage(msg: Message): Unit = {
-      msg.obj match {
-        case "init" =>
-          mapBtn.onClick(gotoMap())
-          listBtn.onClick(gotoList())
-        case _ =>
-      }
-    }
-  }
-
   def gotoList() {
     pager.setInAnimation(self, R.anim.slide_in_top)
     pager.setOutAnimation(self, R.anim.slide_out_bottom)
     pager.setDisplayedChild(1)
-    app.eventHub ! ListMode
+    app.eventHub.send(ListMode)
   }
 
   def gotoMap() {
     pager.setInAnimation(self, R.anim.slide_in_bottom) // dirty?
     pager.setOutAnimation(self, R.anim.slide_out_top)
     pager.setDisplayedChild(0)
-    app.eventHub ! MapMode
+    app.eventHub.send(MapMode)
   }
 
-  handler ! "init"
+  uiHandler.postNow {
+    mapBtn.onClick(gotoMap())
+    listBtn.onClick(gotoList())
+  }
+
 }
 
 object OverlayController {

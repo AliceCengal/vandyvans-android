@@ -2,40 +2,38 @@ package com.vandyapps.vandyvans.view
 
 import android.app.Activity
 import android.content.{Context, Intent}
-import android.os.{Bundle, Handler, Message}
+import android.os.Bundle
 import android.view.View
 import android.widget._
-import com.marsupial.eventhub.Helpers.EasyActivity
-import com.marsupial.eventhub.{AppInjection, ChattyActivity}
+import com.cengallut.appinjection.AppInjection
+import com.cengallut.asyncactivity.AsyncActivity
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{ArrivalTime, Route, Stop}
 import com.vandyapps.vandyvans.services.Global
-import com.vandyapps.vandyvans.services.SyncromaticsClient._
-import com.vandyapps.vandyvans.services.VandyVansClient._
+
+import scala.util.{Failure, Success}
 
 class DetailActivity extends Activity
-    with EasyActivity
-    with Handler.Callback
     with AppInjection[Global]
-    with ChattyActivity
+    with AsyncActivity
 {
   import com.vandyapps.vandyvans.view.DetailActivity._
 
-  def blueRL    = component[RelativeLayout](R.id.rl1)
-  def blueDisp  = component[TextView](R.id.tv1)
-  def redRL     = component[RelativeLayout](R.id.rl2)
-  def redDisp   = component[TextView](R.id.tv2)
-  def greenRL   = component[RelativeLayout](R.id.rl3)
-  def greenDisp = component[TextView](R.id.tv3)
+  def blueRL    = this.component[RelativeLayout](R.id.rl1)
+  def blueDisp  = this.component[TextView](R.id.tv1)
+  def redRL     = this.component[RelativeLayout](R.id.rl2)
+  def redDisp   = this.component[TextView](R.id.tv2)
+  def greenRL   = this.component[RelativeLayout](R.id.rl3)
+  def greenDisp = this.component[TextView](R.id.tv3)
 
   lazy val blueGroup  = new ArrivalTimeViewHolder(blueRL, blueDisp)
   lazy val redGroup   = new ArrivalTimeViewHolder(redRL, redDisp)
   lazy val greenGroup = new ArrivalTimeViewHolder(greenRL, greenDisp)
 
-  def arrivalLoading = component[ProgressBar](R.id.progress1)
-  def failureText    = component[TextView](R.id.tv4)
-  def reminderText   = component[TextView](R.id.tv5)
-  def reminderSwitch = component[Switch](R.id.cb1)
+  def arrivalLoading = this.component[ProgressBar](R.id.progress1)
+  def failureText    = this.component[TextView](R.id.tv4)
+  def reminderText   = this.component[TextView](R.id.tv5)
+  def reminderSwitch = this.component[Switch](R.id.cb1)
 
   lazy val reminderViewController =
     new ReminderViewController(reminderSwitch, reminderText, this)
@@ -57,21 +55,16 @@ class DetailActivity extends Activity
         case n => n
       }
 
-    app.vandyVans ? FetchStopWith(stopId)
-  }
-
-  override def handleMessage(msg: Message) = {
-    msg.obj match {
-      case ArrivalTimeResults(times) =>
-        displayArrivalTimes(times)
-      case StopResults(stops) =>
-        for (s <- stops; ab <- Option(getActionBar)) {
-          ab.setTitle(s.name)
-          app.syncromatics ? FetchArrivalTimes(s)
-        }
-      case _ =>
-    }
-    false
+    app.services.stopsWithId(stopId)
+      .andThenForUi { case Success(s) => getActionBar.setTitle(s.name) }
+      .flatMap(s => app.services.arrivalTimes(s))
+      .onCompleteForUi {
+        case Success(arrivals) =>
+          displayArrivalTimes(arrivals)
+        case Failure(ex) =>
+          arrivalLoading.setVisibility(View.GONE)
+          failureText.setVisibility(View.VISIBLE)
+      }
   }
 
   def displayArrivalTimes(times: Iterable[ArrivalTime]) {

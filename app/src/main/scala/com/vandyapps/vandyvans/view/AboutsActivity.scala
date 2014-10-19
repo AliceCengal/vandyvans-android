@@ -4,29 +4,28 @@ import android.app.Activity
 import android.content.{Context, Intent}
 import android.os.Bundle
 import android.widget.Button
-import com.marsupial.eventhub.Helpers.EasyActivity
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.cengallut.appinjection.AppInjection
+import com.cengallut.asyncactivity.AsyncActivity
+
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.Report
 import com.vandyapps.vandyvans.services.Global
 
 class AboutsActivity extends Activity
-    with EasyActivity
     with AppInjection[Global]
-    with ActorConversion
+    with AsyncActivity
 {
   val TAG_FORMTYPE = "formtype"
   val TAG_BUG = 1000
   val TAG_FEED = 1111
 
-  def bugReport = component[Button](R.id.button1)
-  def feedbackReport = component[Button](R.id.button2)
-  def sourceCode = component[Button](R.id.button6)
+  def bugReport = this.component[Button](R.id.button1)
+  def feedbackReport = this.component[Button](R.id.button2)
+  def sourceCode = this.component[Button](R.id.button6)
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)
     setContentView(R.layout.activity_about)
-
     bugReport.onClick {
       val i = new Intent(AboutsActivity.this, classOf[FormActivity])
       i.putExtra(TAG_FORMTYPE, TAG_BUG)
@@ -51,11 +50,12 @@ class AboutsActivity extends Activity
 
   override def onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
     if (resultCode != Activity.RESULT_CANCELED) {
-      app.vandyVans ! new Report(
+      app.postReport(
+        new Report(
           isBugReport = data.getIntExtra(TAG_FORMTYPE, TAG_FEED) == TAG_BUG,
           senderAddress = data.getStringExtra(FormActivity.RESULT_EMAIL),
           bodyOfReport = data.getStringExtra(FormActivity.RESULT_BODY),
-          notifyWhenResolved = false)
+          notifyWhenResolved = false))
     }
   }
 

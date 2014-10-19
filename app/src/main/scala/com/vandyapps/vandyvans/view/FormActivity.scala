@@ -3,16 +3,15 @@ package com.vandyapps.vandyvans.view
 import android.app.Activity
 import android.os.Bundle
 import android.widget.{Button, EditText, TextView, Toast}
-import com.marsupial.eventhub.Helpers.EasyActivity
 import com.vandyapps.vandyvans.R
 
-class FormActivity extends Activity with EasyActivity {
+class FormActivity extends Activity {
   import com.vandyapps.vandyvans.view.FormActivity._
 
-  def formTitle = component[TextView](R.id.textView1)
-  def emailField = component[EditText](R.id.editText)
-  def bodyField = component[EditText](R.id.editText2)
-  def submit = component[Button](R.id.button3)
+  def formTitle = this.component[TextView](R.id.textView1)
+  def emailField = this.component[EditText](R.id.editText)
+  def bodyField = this.component[EditText](R.id.editText2)
+  def submit = this.component[Button](R.id.button3)
 
   override def onCreate(saved: Bundle) {
     super.onCreate(saved)

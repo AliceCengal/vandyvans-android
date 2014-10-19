@@ -1,13 +1,14 @@
 package com.vandyapps.vandyvans.view
 
+import scala.util.Success
 import android.app.Activity
-import android.os.{Handler, Message}
 import android.view.View
 import android.widget.{AdapterView, ListView}
-import com.marsupial.eventhub.{ActorConversion, AppInjection}
+import com.cengallut.appinjection.AppInjection
+import com.cengallut.asyncactivity.AsyncActivity
 import com.vandyapps.vandyvans.library.ArrayAdapterBuilder
 import com.vandyapps.vandyvans.models.Stop
-import com.vandyapps.vandyvans.services.{Global, VandyVansClient}
+import com.vandyapps.vandyvans.services.Global
 
 /**
  * Defines the behavior of the list of stop in Main Activity. Pull the list of Stops from Services.
@@ -15,31 +16,10 @@ import com.vandyapps.vandyvans.services.{Global, VandyVansClient}
  *
  * Created by athran on 8/22/14.
  */
-trait StopsController extends ActorConversion {
-  self: Activity with AppInjection[Global] =>
-
-  import com.vandyapps.vandyvans.services.VandyVansClient._
+trait StopsController {
+  self: Activity with AppInjection[Global] with AsyncActivity =>
 
   def stopList: ListView
-
-  private[StopsController] implicit object handler extends Handler {
-    override def handleMessage(msg: Message): Unit = {
-      msg.obj match {
-        case "init" =>
-          app.vandyVans ? FetchAllStops
-
-        case VandyVansClient.StopResults(stops) =>
-          stopList.setAdapter(ArrayAdapterBuilder
-            .fromCollection(stops.toArray)
-            .withContext(self)
-            .withResource(android.R.layout.simple_list_item_1)
-            .withStringer(StopToString)
-            .build())
-          stopList.setOnItemClickListener(StopItemClick)
-        case _ =>
-      }
-    }
-  }
 
   private object StopToString extends ArrayAdapterBuilder.ToString[Stop] {
     override def apply(s: Stop) = s.name
@@ -56,5 +36,16 @@ trait StopsController extends ActorConversion {
     }
   }
 
-  handler ! "init"
+  uiHandler.postNow {
+    app.services.stopsForAllRoutes().onCompleteForUi {
+      case Success(ss) =>
+        stopList.setAdapter(ArrayAdapterBuilder
+          .fromCollection(ss.toArray)
+          .withContext(self)
+          .withResource(android.R.layout.simple_list_item_1)
+          .withStringer(StopToString)
+          .build())
+        stopList.setOnItemClickListener(StopItemClick)
+    }
+  }
 }
