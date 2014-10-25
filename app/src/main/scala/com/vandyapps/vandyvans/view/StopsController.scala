@@ -1,6 +1,9 @@
 package com.vandyapps.vandyvans.view
 
-import scala.util.Success
+import android.util.Log
+import com.cengallut.handlerextension.MessageHub
+
+import scala.util.{Failure, Success}
 import android.app.Activity
 import android.view.View
 import android.widget.{AdapterView, ListView}
@@ -36,16 +39,26 @@ trait StopsController {
     }
   }
 
-  uiHandler.postNow {
-    app.services.stopsForAllRoutes().onCompleteForUi {
-      case Success(ss) =>
-        stopList.setAdapter(ArrayAdapterBuilder
-          .fromCollection(ss.toArray)
-          .withContext(self)
-          .withResource(android.R.layout.simple_list_item_1)
-          .withStringer(StopToString)
-          .build())
-        stopList.setOnItemClickListener(StopItemClick)
-    }
+  private val bridge = uiHandler {
+    case OverlayController.ListMode =>
+      app.services.stopsForAllRoutes().onCompleteForUi {
+        case Success(ss) =>
+          stopList.setAdapter(ArrayAdapterBuilder
+            .fromCollection(ss.toArray)
+            .withContext(self)
+            .withResource(android.R.layout.simple_list_item_1)
+            .withStringer(StopToString)
+            .build())
+          stopList.setOnItemClickListener(StopItemClick)
+
+        case Failure(ex) =>
+          Log.e(Global.APP_LOG_ID, "Failed to fetch stops for all routes")
+          Log.e(Global.APP_LOG_ID, ex.getMessage)
+      }
   }
+
+  bridge.postNow {
+    app.eventHub.send(MessageHub.Subscribe(bridge))
+  }
+
 }

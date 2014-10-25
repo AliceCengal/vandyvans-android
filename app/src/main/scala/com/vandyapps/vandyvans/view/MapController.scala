@@ -2,7 +2,7 @@ package com.vandyapps.vandyvans.view
 
 import android.os.Handler
 
-import scala.util.Success
+import scala.util.{Failure, Success}
 import android.util.Log
 import android.app.Activity
 import android.widget.{Button, LinearLayout}
@@ -40,7 +40,8 @@ trait MapController {
     case "tock" =>
       if (isLiveMapping) {
         app.services.vans(currentRoute).onCompleteForUi {
-          case Success(vs) => vanTracker.displayVans(vs) }
+          case Success(vs) => vanTracker.displayVans(vs)
+          case Failure(ex) => }
       }
   }
 

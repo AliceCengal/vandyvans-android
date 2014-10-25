@@ -3,7 +3,7 @@ package com.vandyapps.vandyvans.services
 import java.io.StringWriter
 import scala.collection.JavaConversions._
 import scala.concurrent.{Future, ExecutionContext}
-import scala.util.Success
+import scala.util.{Failure, Success}
 
 import android.content.{SharedPreferences, Context}
 import android.os.{AsyncTask, Handler}
@@ -94,6 +94,7 @@ class Global extends android.app.Application
                 servicesHolder.allWaypoints += r -> ps
             }
           }
+        case Failure(ex) =>
       }
 
     } else {
@@ -104,12 +105,14 @@ class Global extends android.app.Application
       val greenPath  = servicesHolder.waypoints(Route.GREEN)
       val bluePath   = servicesHolder.waypoints(Route.BLUE)
 
-      for (rs <- redStops;
-           gs <- greenStops;
-           bs <- blueStops;
-           rp <- redPath;
-           gp <- greenPath;
-           bp <- bluePath) {
+      for {
+        rs <- redStops
+        gs <- greenStops
+        bs <- blueStops
+        rp <- redPath
+        gp <- greenPath
+        bp <- bluePath
+      } {
 
         val string = new StringWriter()
         val jsonWriter = new JsonWriter(string)
@@ -264,7 +267,7 @@ private[services] class CachedServerCalls extends VansServerCalls {
 
   override def stopsForAllRoutes()
                                 (implicit exec: ExecutionContext): Future[List[Stop]] =
-    Future { allStops.values.flatten.toList }
+    Future { allStops.values.flatten.toSet.toList }
 
   override def postReport(report: Report)
                          (implicit exec: ExecutionContext): Future[Unit] =
