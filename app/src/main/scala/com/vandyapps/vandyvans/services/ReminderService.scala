@@ -7,8 +7,10 @@ import android.os._
 import android.util.Log
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.{Stop, ArrivalTime}
+import com.cengallut.handlerextension.HandlerExt
+import com.vandyapps.vandyvans.client.VansServerCalls
 
-class ReminderService extends Service with Handler.Callback {
+private[services] class ReminderService extends Service with Handler.Callback {
   import ReminderService._
 
   lazy val workerThread = new HandlerThread("reminderThread")
@@ -41,13 +43,13 @@ class ReminderService extends Service with Handler.Callback {
         logMessage(s"Received subscription request: ${msg.arg1}")
         val tracker = new StopTracker(msg.arg1, trackerHandler, syncroHandler)
         Message.obtain(tracker, INIT).sendToTarget()
-        trackers = trackers + tracker
+        trackers += tracker
 
       case UNSUBSCRIBE_TO_STOP =>
         logMessage(s"Received unsubscription request: ${msg.arg1}")
         trackers.find(_.id == msg.arg1).foreach { tracker =>
           Message.obtain(tracker, STOP_TRACKING).sendToTarget()
-          trackers = trackers - tracker
+          trackers -= tracker
         }
 
       case ADD_CLIENT =>
@@ -58,7 +60,7 @@ class ReminderService extends Service with Handler.Callback {
 
       case VAN_IS_ARRIVEN =>
         val reportingTracker = msg.obj.asInstanceOf[StopTracker]
-        trackers = trackers - reportingTracker
+        trackers -= reportingTracker
         reportingTracker.latestArrivalTime.foreach { doBroadcastVanArrival }
         if (trackers.isEmpty) { stopSelf() }
     }
@@ -78,7 +80,7 @@ class ReminderService extends Service with Handler.Callback {
 
     val notificationMan = getSystemService(Context.NOTIFICATION_SERVICE).asInstanceOf[NotificationManager]
     logMessage(s"About to broadcast for: ${arrivalTime.toString}")
-    reminderId = reminderId + 1
+    reminderId += 1
     notificationMan.notify(
       reminderId,
       new Notification.Builder(this)
@@ -93,17 +95,26 @@ class ReminderService extends Service with Handler.Callback {
 }
 
 object ReminderService {
-  val SUBSCRIBE_TO_STOP: Int = 42
-  val UNSUBSCRIBE_TO_STOP: Int = 43
-  val VAN_IS_ARRIVEN: Int = 44
-  val ADD_CLIENT: Int = 45
-  val REMOVE_CLIENT: Int = 46
-  private val STOP_TRACKING: Int = 47
-  private val INIT: Int = 48
-  val NOTIFY_PARENT = 55
+  val SUBSCRIBE_TO_STOP   = 42
+  val UNSUBSCRIBE_TO_STOP = 43
+  val VAN_IS_ARRIVEN      = 44
+  val ADD_CLIENT          = 45
+  val REMOVE_CLIENT       = 46
+  val NOTIFY_PARENT       = 55
+
+  private val STOP_TRACKING = 47
+  private val INIT          = 48
 
   def logMessage(msg: String) {
     Log.i(Global.APP_LOG_ID, "ReminderService | " + msg)
+  }
+
+  def stopTracker(id: Int,
+                  parent: HandlerExt,
+                  services: VansServerCalls): HandlerExt = {
+    handler() {
+      case _ =>
+    }
   }
 
   class StopTracker(val id: Int,
