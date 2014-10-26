@@ -10,7 +10,7 @@ import com.vandyapps.vandyvans.models.{Stop, ArrivalTime}
 import com.cengallut.handlerextension.HandlerExt
 import com.vandyapps.vandyvans.client.VansServerCalls
 
-private[services] class ReminderService extends Service with Handler.Callback {
+class ReminderService extends Service with Handler.Callback {
   import ReminderService._
 
   lazy val workerThread = new HandlerThread("reminderThread")

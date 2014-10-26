@@ -1,7 +1,5 @@
 package com.vandyapps.vandyvans.view
 
-import android.os.Handler
-
 import scala.util.{Failure, Success}
 import android.util.Log
 import android.app.Activity
@@ -59,7 +57,7 @@ trait MapController {
     case h: HandlerExt => h.sendDelayed(interval, h)
   }
 
-  private val tock: Handler with HandlerExt = uiHandler {
+  private val tock = uiHandler {
     case h: HandlerExt =>
       Log.i(Global.APP_LOG_ID, "Received Tick")
       bridge.send("tock")
