@@ -3,49 +3,45 @@ package com.vandyapps.vandyvans.client
 import java.io.Reader
 import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 import com.google.gson.JsonParser
 import com.squareup.okhttp.{Request, OkHttpClient}
 import com.vandyapps.vandyvans.models._
 
 trait VansServerCalls {
 
-  def vans(route: Route)
-          (implicit exec: ExecutionContext): Future[List[Van]]
+  implicit def exec: ExecutionContext
 
-  def arrivalTimes(stop: Stop)
-                  (implicit exec: ExecutionContext): Future[List[ArrivalTime]]
+  def vans(route: Route): Future[List[Van]]
 
-  def stops(route: Route)
-           (implicit exec: ExecutionContext): Future[List[Stop]]
+  def arrivalTimes(stop: Stop): Future[List[ArrivalTime]]
 
-  def stopsForAllRoutes()(implicit exec: ExecutionContext): Future[List[Stop]]
+  def stops(route: Route): Future[List[Stop]]
 
-  def stopsWithId(id: Int)
-                 (implicit exec: ExecutionContext): Future[Stop]
+  def stopsForAllRoutes(): Future[List[Stop]]
 
-  def waypoints(route: Route)
-               (implicit exec: ExecutionContext): Future[List[(Double,Double)]]
+  def stopsWithId(id: Int): Future[Stop]
 
-  def postReport(report: Report)
-                (implicit exec: ExecutionContext): Future[Unit]
+  def waypoints(route: Route): Future[List[(Double,Double)]]
+
+  def postReport(report: Report): Future[Unit]
 
 }
 
 object VansServerCalls {
 
-  def create: VansServerCalls = new VansClient
+  def create(implicit exec: ExecutionContext): VansServerCalls = new VansClient
 
 }
 
-private[client] class VansClient extends VansServerCalls {
+private[client] class VansClient(implicit val exec: ExecutionContext) extends VansServerCalls {
 
   lazy val client  = new OkHttpClient
   lazy val parser  = new JsonParser
   lazy val request = new Request.Builder
 
 
-  override def vans(route: Route)
-                   (implicit exec: ExecutionContext): Future[List[Van]] =
+  override def vans(route: Route): Future[List[Van]] =
     Future {
       val stream =
         fetchAsStream(VansClient.vanFetchUrl(route))
@@ -57,8 +53,7 @@ private[client] class VansClient extends VansServerCalls {
       vanResult
     }
 
-  override def stops(route: Route)
-                    (implicit exec: ExecutionContext): Future[List[Stop]] =
+  override def stops(route: Route): Future[List[Stop]] =
     Future {
       val stream =
         fetchAsStream(VansClient.stopsFetchUrl(route))
@@ -69,19 +64,17 @@ private[client] class VansClient extends VansServerCalls {
       stopsResult
     }
 
-  override def stopsForAllRoutes()(implicit exec: ExecutionContext): Future[List[Stop]] =
+  override def stopsForAllRoutes(): Future[List[Stop]] =
     Future {
       List.empty[Stop]
     }
 
-  override def stopsWithId(id: Int)
-                          (implicit exec: ExecutionContext): Future[Stop] =
+  override def stopsWithId(id: Int): Future[Stop] =
     Future {
       Stop(0, "No Stop")
     }
 
-  override def waypoints(route: Route)
-                        (implicit exec: ExecutionContext): Future[List[(Double, Double)]] =
+  override def waypoints(route: Route): Future[List[(Double, Double)]] =
     Future {
       val stream =
         fetchAsStream(VansClient.waypointsFetchUrl(route))
@@ -93,20 +86,21 @@ private[client] class VansClient extends VansServerCalls {
       pointsResult
     }
 
-  override def arrivalTimes(stop: Stop)
-                           (implicit exec: ExecutionContext): Future[List[ArrivalTime]] =
+  override def arrivalTimes(stop: Stop): Future[List[ArrivalTime]] =
     Future(Route.getAll).flatMap { routes =>
       val fs = routes.map(arrivalTime(stop, _))
+
       fs.foldLeft(Future(List.empty[ArrivalTime])) {
         (fats, fat) =>
-          for {
+          (for {
             ats <- fats
             at <- fat
-          } yield at :: ats
-      }
+          } yield at :: ats)
+            // This is totally unintentional, I swear.
+            .recoverWith { case NonFatal(e) => fats } }
     }
 
-  def arrivalTime(stop: Stop, r: Route)(implicit exec: ExecutionContext): Future[ArrivalTime] =
+  def arrivalTime(stop: Stop, r: Route): Future[ArrivalTime] =
     Future {
       val stream =
         fetchAsStream(VansClient.arrivalFetchUrl(stop, r))
@@ -122,8 +116,7 @@ private[client] class VansClient extends VansServerCalls {
     }
 
 
-  override def postReport(report: Report)
-                         (implicit exec: ExecutionContext): Future[Unit] =
+  override def postReport(report: Report): Future[Unit] =
     Future {}
 
   def fetchAsStream(url: String): Reader =
@@ -134,8 +127,8 @@ private[client] class VansClient extends VansServerCalls {
 private[client] object VansClient {
 
   private val SYN_BASE_URL = "http://api.syncromatics.com"
-  private val SYN_API_KEY = "?api_key=a922a34dfb5e63ba549adbb259518909"
-  private val VV_BASE_URL   = "http://vandyvans.com"
+  private val SYN_API_KEY  = "?api_key=a922a34dfb5e63ba549adbb259518909"
+  private val VV_BASE_URL  = "http://vandyvans.com"
 
   def vanFetchUrl(route: Route) =
     s"$SYN_BASE_URL/Route/${route.waypointId}/Vehicles$SYN_API_KEY"

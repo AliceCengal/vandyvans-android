@@ -3,6 +3,7 @@ package com.vandyapps.vandyvans.view
 import android.app.Activity
 import android.content.{Context, Intent}
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget._
 import com.cengallut.appinjection.AppInjection
@@ -64,6 +65,7 @@ class DetailActivity extends Activity
         case Failure(ex) =>
           arrivalLoading.setVisibility(View.GONE)
           failureText.setVisibility(View.VISIBLE)
+          Log.e(Global.APP_LOG_ID, s"Error to fetch Arrival times: ${ex.getMessage}")
       }
   }
 
