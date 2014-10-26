@@ -34,12 +34,12 @@ object VansServerCalls {
 
 }
 
-private[client] class VansClient(implicit val exec: ExecutionContext) extends VansServerCalls {
+private[client]
+class VansClient(implicit val exec: ExecutionContext) extends VansServerCalls {
 
   lazy val client  = new OkHttpClient
   lazy val parser  = new JsonParser
   lazy val request = new Request.Builder
-
 
   override def vans(route: Route): Future[List[Van]] =
     Future {
@@ -65,14 +65,10 @@ private[client] class VansClient(implicit val exec: ExecutionContext) extends Va
     }
 
   override def stopsForAllRoutes(): Future[List[Stop]] =
-    Future {
-      List.empty[Stop]
-    }
+    Future.successful(List.empty[Stop])
 
   override def stopsWithId(id: Int): Future[Stop] =
-    Future {
-      Stop(0, "No Stop")
-    }
+    Future.successful(Stop(0, "No Stop"))
 
   override def waypoints(route: Route): Future[List[(Double, Double)]] =
     Future {
@@ -87,7 +83,7 @@ private[client] class VansClient(implicit val exec: ExecutionContext) extends Va
     }
 
   override def arrivalTimes(stop: Stop): Future[List[ArrivalTime]] =
-    Future(Route.getAll).flatMap { routes =>
+    Future.successful(Route.getAll).flatMap { routes =>
       val fs = routes.map(arrivalTime(stop, _))
 
       fs.foldLeft(Future(List.empty[ArrivalTime])) {
@@ -115,9 +111,8 @@ private[client] class VansClient(implicit val exec: ExecutionContext) extends Va
         minutes = arrivalResultObject.get("Minutes").getAsInt)
     }
 
-
   override def postReport(report: Report): Future[Unit] =
-    Future {}
+    Future.successful({})
 
   def fetchAsStream(url: String): Reader =
     client.newCall(request.url(url).build()).execute().body().charStream()

@@ -29,7 +29,9 @@ class Global extends android.app.Application
   private lazy val servicesHolder = new CachedServerCalls
   lazy val eventHub = MessageHub.create
 
-  private lazy val prefs = getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
+  private lazy val prefs =
+    getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
+  
   private lazy val cacheManager = new DataCache(prefs)
 
   override def onCreate() {
@@ -232,7 +234,7 @@ class CachedServerCalls(implicit val exec: ExecutionContext)
     client.vans(route)
 
   override def stops(route: Route): Future[List[Stop]] =
-    allStops.get(route).map(Future(_))
+    allStops.get(route).map(Future.successful)
       .getOrElse({
       client.stops(route).andThen { case Success(ss) =>
         mainThread.postNow {
@@ -242,14 +244,14 @@ class CachedServerCalls(implicit val exec: ExecutionContext)
     })
 
   override def stopsWithId(id: Int): Future[Stop] =
-    Future {
+    Future.successful {
       allStops.valuesIterator.flatten
         .find(_.id == id)
-        .getOrElse(Stop(0, ""))
+        .get // Failure if not found
     }
 
   override def waypoints(route: Route): Future[List[(Double, Double)]] =
-    allWaypoints.get(route).map(Future(_))
+    allWaypoints.get(route).map(Future.successful)
       .getOrElse({
       client.waypoints(route).andThen { case Success(ws) =>
         mainThread.postNow {
@@ -262,7 +264,7 @@ class CachedServerCalls(implicit val exec: ExecutionContext)
     client.arrivalTimes(stop)
 
   override def stopsForAllRoutes(): Future[List[Stop]] =
-    Future { allStops.values.flatten.toSet.toList }
+    Future.successful { allStops.values.flatten.toSet.toList }
 
   override def postReport(report: Report): Future[Unit] =
     Future {
