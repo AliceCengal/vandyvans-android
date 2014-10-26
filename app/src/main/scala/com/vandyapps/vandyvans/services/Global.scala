@@ -156,16 +156,16 @@ class Global extends android.app.Application
 
 object Global {
   val DEFAULT_LONGITUDE = -86.805811
-  val DEFAULT_LATITUDE = 36.143905
-  val APP_LOG_ID = "VandyVans"
-  val APP_PREFERENCES = "VandyVansPreferences"
+  val DEFAULT_LATITUDE  = 36.143905
+  val APP_LOG_ID        = "VandyVans"
+  val APP_PREFERENCES   = "VandyVansPreferences"
 }
 
 private[services] class DataCache(prefs: SharedPreferences) {
 
   val GLOBAL_DATA_CACHE = "GLOBAL_DATA_CACHE"
   val GLOBAL_CACHE_TIME = "GLOBAL_CACHE_TIME"
-  private val CACHE_EXPIRATION: Long = 14 * 24 * 3600 * 1000
+  val CACHE_EXPIRATION: Long = 14 * 24 * 3600 * 1000
 
   def hasCache =
     prefs.contains(GLOBAL_DATA_CACHE) &&
