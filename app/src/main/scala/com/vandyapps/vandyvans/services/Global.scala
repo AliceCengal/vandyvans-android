@@ -11,7 +11,6 @@ import android.util.Log
 
 import com.google.gson.JsonParser
 import com.google.gson.stream.JsonWriter
-import com.parse.{ParseObject, Parse}
 
 import com.cengallut.handlerextension.{HandlerExtensionPackage, MessageHub}
 import com.vandyapps.vandyvans.client.VansServerCalls
@@ -26,7 +25,7 @@ class Global extends android.app.Application
     ExecutionContext.fromExecutor(AsyncTask.THREAD_POOL_EXECUTOR)
 
   private lazy val reminders = new SimpleReminderController(this)
-  private lazy val servicesHolder = new CachedServerCalls
+  private lazy val servicesHolder = new CachedServerCalls(this)
   lazy val eventHub = MessageHub.create
 
   private lazy val prefs =
@@ -37,11 +36,6 @@ class Global extends android.app.Application
   override def onCreate() {
     super.onCreate()
     reminders.start()
-
-    Parse.initialize(this,
-      "6XOkxBODp8HZANJaxFhEfSFPZ8H93Pt9531Htt1X",
-      "61wOewMMN0YISmX3UM79PGssnTsz1NfkOOMOsHMm")
-
     cacheInstatement()
   }
 
@@ -198,76 +192,4 @@ private[services] class UserSettings(prefs: SharedPreferences) {
 
 }
 
-private[services] class ParseClient {
-  import ParseClient._
 
-  def postReportUsingParseApi(report: Report) {
-    val reportObj = new ParseObject(REPORT_CLASSNAME)
-    reportObj.put(REPORT_USEREMAIL, report.senderAddress)
-    reportObj.put(REPORT_BODY     , report.bodyOfReport)
-    reportObj.put(REPORT_ISBUG    , report.isBugReport)
-    reportObj.put(REPORT_NOTIFY   , report.notifyWhenResolved)
-    reportObj.save()
-  }
-
-}
-
-private[services] object ParseClient {
-  private val REPORT_CLASSNAME = "VVReport"
-  private val REPORT_USEREMAIL = "userEmail"
-  private val REPORT_BODY      = "body"
-  private val REPORT_ISBUG     = "isBugReport"
-  private val REPORT_NOTIFY    = "notifyWhenResolved"
-}
-
-private[services]
-class CachedServerCalls(implicit val exec: ExecutionContext)
-    extends VansServerCalls {
-
-  val client       = VansServerCalls.create
-  val parseClient  = new ParseClient
-  val mainThread   = uiHandler
-  var allStops     = Map.empty[Route, List[Stop]]
-  var allWaypoints = Map.empty[Route, List[(Double,Double)]]
-
-  override def vans(route: Route): Future[List[Van]] =
-    client.vans(route)
-
-  override def stops(route: Route): Future[List[Stop]] =
-    allStops.get(route).map(Future.successful)
-      .getOrElse({
-      client.stops(route).andThen { case Success(ss) =>
-        mainThread.postNow {
-          allStops += (route -> ss)
-        }
-      }
-    })
-
-  override def stopsWithId(id: Int): Future[Stop] =
-    Future.successful {
-      allStops.valuesIterator.flatten
-        .find(_.id == id)
-        .get // Failure if not found
-    }
-
-  override def waypoints(route: Route): Future[List[(Double, Double)]] =
-    allWaypoints.get(route).map(Future.successful)
-      .getOrElse({
-      client.waypoints(route).andThen { case Success(ws) =>
-        mainThread.postNow {
-          allWaypoints += (route -> ws)
-        }
-      }
-    })
-
-  override def arrivalTimes(stop: Stop): Future[List[ArrivalTime]] =
-    client.arrivalTimes(stop)
-
-  override def stopsForAllRoutes(): Future[List[Stop]] =
-    Future.successful { allStops.values.flatten.toSet.toList }
-
-  override def postReport(report: Report): Future[Unit] =
-    Future {
-      parseClient.postReportUsingParseApi(report)
-    }
-}
