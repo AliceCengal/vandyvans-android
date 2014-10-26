@@ -135,14 +135,7 @@ private[client] object VansClient {
 
   private val SYN_BASE_URL = "http://api.syncromatics.com"
   private val SYN_API_KEY = "?api_key=a922a34dfb5e63ba549adbb259518909"
-
   private val VV_BASE_URL   = "http://vandyvans.com"
-
-  private val ROUTE_CACHE_DATE       = "VandyVansClientRouteCacheDate"
-  private val ROUTE_DATA             = "VandyVansClientRouteData"
-  private val STOPS_CACHE_DATE       = "VandyVansClientStopsCacheDate"
-  private val STOPS_DATA             = "VandyVansClientStopsData"
-  private val CACHE_EXPIRATION: Long = 14 * 24 * 3600 * 1000
 
   def vanFetchUrl(route: Route) =
     s"$SYN_BASE_URL/Route/${route.waypointId}/Vehicles$SYN_API_KEY"
