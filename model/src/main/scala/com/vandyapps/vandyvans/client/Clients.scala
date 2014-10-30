@@ -8,32 +8,63 @@ import com.google.gson.JsonParser
 import com.squareup.okhttp.{Request, OkHttpClient}
 import com.vandyapps.vandyvans.models._
 
+/** An abstract declaration of the API calls provided by the Vandy Vans server.
+  *
+  * The companion object provides an implementation of some of these calls. All methods in this
+  * trait return a [[Future]] of the result. They may or may not be actual asynchronous calls.
+  * Depends on implementation.
+  */
 trait VansServerCalls {
 
+  /** The thread pool executor for the Futures. */
   implicit def exec: ExecutionContext
 
+  /** Returns the [[Van]] that runs through the given [[Route]]. The [[Van]] instances contain
+    * real-time GPS data of each van as well as their occupancy level. */
   def vans(route: Route): Future[List[Van]]
 
+  /** Returns [[ArrivalTime]] predictions for a given [[Stop]] in minutes. */
   def arrivalTimes(stop: Stop): Future[List[ArrivalTime]]
 
+  /** Returns the [[Stop]]s visited by the given [[Route]]. */
   def stops(route: Route): Future[List[Stop]]
 
+  /** Returns all [[Stop]]s of all [[Route]]s. */
   def stopsForAllRoutes(): Future[List[Stop]]
 
+  /** Returns the [[Stop]] with the given ID. Returns [[scala.util.Failure]] if there is no Stop
+    * with the given ID. */
   def stopsWithId(id: Int): Future[Stop]
 
+  /** Returns the coordinates that traces the path of a [[Route]]. */
   def waypoints(route: Route): Future[List[(Double,Double)]]
 
+  /** Posts the user [[Report]] to some server somewhere in the cloud. */
   def postReport(report: Report): Future[Unit]
 
 }
 
 object VansServerCalls {
 
+  /** Returns a partial implementation of [[VansServerCalls]].
+    *
+    * The implemented methods are:
+    *
+    *  - [[VansServerCalls.vans()]]
+    *  - [[VansServerCalls.arrivalTimes()]]
+    *  - [[VansServerCalls.stops()]]
+    *  - [[VansServerCalls.waypoints()]]
+    *
+    * The other methods return Null Objects.
+    */
   def create(implicit exec: ExecutionContext): VansServerCalls = new VansClient
 
 }
 
+/** A partial implementation of [[VansServerCalls]]. Only the methods which has a direct
+  * equivalent in the actual Vandy Vans API are implemented. Each method call will do a server
+  * call. This class is stateless. No caching is done.
+  */
 private[client]
 class VansClient(implicit val exec: ExecutionContext) extends VansServerCalls {
 

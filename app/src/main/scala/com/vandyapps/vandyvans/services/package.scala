@@ -1,6 +1,7 @@
 package com.vandyapps.vandyvans
 
 import com.cengallut.handlerextension.HandlerExtensionPackage
-import com.vandyapps.vandyvans.library.AndroidImplicit
 
-package object services extends AndroidImplicit with HandlerExtensionPackage
+/** Provides services that connect the app to the Vandy Vans server.
+  */
+package object services extends HandlerExtensionPackage

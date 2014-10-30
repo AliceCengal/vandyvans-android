@@ -3,6 +3,18 @@ package com.vandyapps.vandyvans.models
 import com.google.gson.JsonObject
 import com.google.gson.stream.JsonWriter
 
+/** A place where the shuttle vans stops to pick up and drop off.
+  *
+  * There is technically a finite set of stops, but they are subject to change,
+  * so I didn't bother to make them static.
+  *
+  * @param id The id used by the VV system to identify this Stop
+  * @param name The name of this stop. Usually indicates where/what building it is near to.
+  * @param image Junk
+  * @param latitude Latitude of the stop
+  * @param longitude Longitude of the stop
+  * @param rtpi Dunno. Junk
+  */
 case class Stop(id: Int,
                 name: String,
                 image: String = "",
@@ -12,6 +24,10 @@ case class Stop(id: Int,
 {
   import Stop._
 
+  /** Serialize this Stop into JSON.
+    *
+    * @param writer The serialization target
+    */
   def writeJson(writer: JsonWriter): Unit = {
     writer.beginObject()
       .name(TAG_ID).value(id)
@@ -25,17 +41,35 @@ case class Stop(id: Int,
 }
 
 object Stop {
+
+  /** JSON tag */
   val TAG_ID    = "ID"
+
+  /** JSON tag */
   val TAG_IMAGE = "Image"
+
+  /** JSON tag */
   val TAG_LAT   = "Latitude"
+
+  /** JSON tag */
   val TAG_LON   = "Longitude"
+
+  /** JSON tag */
   val TAG_NAME  = "Name"
+
+  /** JSON tag */
   val TAG_RTPI  = "RtpiNumber"
 
+  /** Returns a stop with the given id. */
+  @deprecated
   def forId(id: Int): Option[Stop] = staticList.find(_.id == id)
 
+  /** Returns a short list of Stops. */
+  @deprecated
   def getShortList = staticList.toList.take(4)
 
+  /** Returns a list of all the Stops. */
+  @deprecated
   def getAll = staticList.toList
 
   private val staticList =
@@ -55,6 +89,7 @@ object Stop {
       Stop(401204, "Blakemore House"),
       Stop(446923, "Medical Center"))
 
+  /** Deserializes a JSON object into a Stop instance. */
   def fromJson(jsonObj: JsonObject) =
     Stop(
       id = jsonObj.get(Stop.TAG_ID).getAsInt,

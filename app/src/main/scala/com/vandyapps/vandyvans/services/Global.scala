@@ -17,6 +17,19 @@ import com.vandyapps.vandyvans.client.VansServerCalls
 import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models._
 
+/** The app's Application.
+  *
+  * Provide access to many key global services.
+  *
+  *  - Color for each Route.
+  *  - Reminder service.
+  *  - Global message bus.
+  *  - Vandy Vans API.
+  *  - Global settings and preferences.
+  *
+  * This class is not a God object, I think. Most of the services are delegated to other objects.
+  * It is just a convenient centralized access point or a facade.
+  */
 class Global extends android.app.Application
     with ReminderController
     with HandlerExtensionPackage

@@ -17,7 +17,7 @@ private[services]
 class CachedServerCalls(ctx: Context)(implicit val exec: ExecutionContext)
     extends VansServerCalls {
 
-  val client       = VansServerCalls.create
+  val client       = new LogServerCall(VansServerCalls.create)
   val mainThread   = uiHandler
   var allStops     = Map.empty[Route, List[Stop]]
   var allWaypoints = Map.empty[Route, List[(Double,Double)]]
