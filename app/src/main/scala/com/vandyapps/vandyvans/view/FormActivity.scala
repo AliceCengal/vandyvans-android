@@ -5,6 +5,11 @@ import android.os.Bundle
 import android.widget.{Button, EditText, TextView, Toast}
 import com.vandyapps.vandyvans.R
 
+/**
+ * Display forms for feedback and bug report.
+ *
+ * layout: R.layout.report_form
+ */
 class FormActivity extends Activity {
   import com.vandyapps.vandyvans.view.FormActivity._
 

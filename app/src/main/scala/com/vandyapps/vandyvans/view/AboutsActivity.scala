@@ -11,6 +11,11 @@ import com.vandyapps.vandyvans.R
 import com.vandyapps.vandyvans.models.Report
 import com.vandyapps.vandyvans.services.Global
 
+/**
+ * Settings and Credits
+ *
+ * layout: R.layout.activity_about
+ */
 class AboutsActivity extends Activity
     with AppInjection[Global]
     with AsyncActivity

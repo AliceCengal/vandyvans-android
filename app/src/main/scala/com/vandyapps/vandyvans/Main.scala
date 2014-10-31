@@ -19,6 +19,8 @@ import com.vandyapps.vandyvans.view._
   * represents several months of my effort chasing down Exceptions and researching StackOverflow
   * threads for non-sensical solutions to non-sensical problems. Leave it as it is. Don't touch.
   *
+  * layout: R.layout.activity_stop
+  *
   * ===Mixins===
   * [[AppInjection]] is provided by app-injection.aar and is documented in [[https://github
   * .com/AliceCengal/android-app-injection the Github page]].

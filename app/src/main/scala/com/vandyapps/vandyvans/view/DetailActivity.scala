@@ -14,6 +14,11 @@ import com.vandyapps.vandyvans.services.Global
 
 import scala.util.{Failure, Success}
 
+/**
+ * Displays the arrival times for a Stop.
+ *
+ * layout: R.layout.activity_stopdetail
+ */
 class DetailActivity extends Activity
     with AppInjection[Global]
     with AsyncActivity

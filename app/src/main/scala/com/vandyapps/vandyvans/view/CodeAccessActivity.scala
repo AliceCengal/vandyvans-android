@@ -7,6 +7,11 @@ import android.os.Bundle
 import android.widget.{Button, Toast}
 import com.vandyapps.vandyvans.R
 
+/**
+ * Provide options for the user to view the app's source code.
+ *
+ * layout: R.layout.source_code_access
+ */
 class CodeAccessActivity extends Activity {
 
   lazy val LINK_TO_REPOSITORY = getString(R.string.sourcecode_link)
