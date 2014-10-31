@@ -28,7 +28,7 @@ import com.vandyapps.vandyvans.models._
   *  - Global settings and preferences.
   *
   * This class is not a God object, I think. Most of the services are delegated to other objects.
-  * It is just a convenient centralized access point or a facade.
+  * It is just a convenient centralized access point, or a facade.
   */
 class Global extends android.app.Application
     with ReminderController
@@ -39,12 +39,14 @@ class Global extends android.app.Application
 
   private lazy val reminders = new SimpleReminderController(this)
   private lazy val servicesHolder = new CachedServerCalls(this)
-  lazy val eventHub = MessageHub.create
 
   private lazy val prefs =
     getSharedPreferences(Global.APP_PREFERENCES, Context.MODE_PRIVATE)
-  
+
   private lazy val cacheManager = new DataCache(prefs)
+
+  /** A message hub that provide many-to-many communication throughout the app. */
+  lazy val eventHub = MessageHub.create
 
   override def onCreate() {
     super.onCreate()
@@ -52,24 +54,30 @@ class Global extends android.app.Application
     cacheInstatement()
   }
 
-  def getColorFor(route: Route) = route match {
+  /** Returns the color resource associated with a route */
+  def getColorFor(route: Route): Int = route match {
     case Route.BLUE => getResources.getColor(R.color.dusky_gray)
     case Route.RED => getResources.getColor(R.color.red_argb)
     case Route.GREEN => getResources.getColor(R.color.dark_gold)
     case _ => getResources.getColor(android.R.color.black)
   }
 
+  /** Add a subscription to this stop to receive notification */
   def subscribeReminderForStop(stopdId: Int): Unit =
     reminders.subscribeReminderForStop(stopdId)
 
+  /** Remove subscription from this stop */
   def unsubscribeReminderForStop(stopId: Int): Unit =
     reminders.unsubscribeReminderForStop(stopId)
 
+  /** Returns true if there is an active subscription to this stop */
   def isSubscribedToStop(stopId: Int): Boolean =
     reminders.isSubscribedToStop(stopId)
 
+  /** All API calls */
   def services: VansServerCalls = servicesHolder
 
+  /** All user preferences */
   def preferences: SharedPreferences = prefs
 
   private def cacheInstatement(): Unit = {

@@ -21,6 +21,9 @@ trait OverlayController {
   def mapBtn: Button
   def listBtn: Button
 
+  /**
+   * Slide the overlay to reveal the list of stops.
+   */
   def gotoList() {
     pager.setInAnimation(self, R.anim.slide_in_top)
     pager.setOutAnimation(self, R.anim.slide_out_bottom)
@@ -28,6 +31,9 @@ trait OverlayController {
     app.eventHub.send(ListMode)
   }
 
+  /**
+   * Slide the overlay to reveal the map.
+   */
   def gotoMap() {
     pager.setInAnimation(self, R.anim.slide_in_bottom) // dirty?
     pager.setOutAnimation(self, R.anim.slide_out_top)
@@ -44,7 +50,10 @@ trait OverlayController {
 
 object OverlayController {
 
+  /** A signal object to indicate that the overlay has transitioned to Map */
   case object MapMode
+
+  /** A signal object to indicate that the overlay has transitioned to List */
   case object ListMode
 
 }

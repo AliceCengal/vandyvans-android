@@ -74,7 +74,7 @@ trait MapController {
     isLiveMapping = false
   }
 
-  def routeSelected(route: Route) {
+  private def routeSelected(route: Route) {
     if (currentRoute != route) {
       currentRoute = route
       overlayBar.setBackgroundColor(app.getColorFor(route))
@@ -97,7 +97,7 @@ trait MapController {
     }
   }
 
-  def drawWaypoints(map: GoogleMap,
+  private def drawWaypoints(map: GoogleMap,
                     color: Int,
                     waypoints: Seq[(Double,Double)]): Unit =
   {
@@ -124,7 +124,7 @@ object MapController {
   case object StartLiveMap
   case object StopLiveMap
 
-  class VanTracker(private val map: GoogleMap) {
+  private class VanTracker(private val map: GoogleMap) {
 
     private var markers = List.empty[Marker]
 
@@ -163,7 +163,7 @@ object MapController {
 
   }
 
-  class StopTracker(private val map: GoogleMap, private val ctx: Activity)
+  private class StopTracker(private val map: GoogleMap, private val ctx: Activity)
       extends GoogleMap.OnInfoWindowClickListener {
 
     private var markers = List.empty[Marker]
